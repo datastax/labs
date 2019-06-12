@@ -1,7 +1,11 @@
 # DataStax Graph Labs
 
 These are the instructions for installing and using the DataStax Graph
-Labs preview.
+Labs preview using Docker images.
+
+For the downloadable tarball version of the Graph preview, refer to
+the [DataStax Labs][1] website and download DataStax Graph (DSG). Then
+follow the instructions with the included README.md from the download.
 
 ## What's New and Documentation
 
@@ -16,9 +20,9 @@ Because this is an experimental preview of a new graph engine in
 DataStax Graph, a subset of documentation is available that describes
 the new concepts included in DataStax Graph.
 
-Please review the ./graph-docs/README.html file for an overview of the
-features, behaviors, and functionality of the experimental and new
-graph engine.
+Please review the [graph-docs](./graph-docs/) directory file for an
+overview of the features, behaviors, and functionality of the
+experimental and new graph engine.
 
 ### DataStax Studio Sample Notebooks
 
@@ -31,15 +35,13 @@ Three different Getting Started notebooks are provided in this
 package:
 
 * DataStax Graph Gremlin - start here for a pure Gremlin experience
-* DataStax Graph CQL as Graph - start here to use CQL to create a new graph.
-* DataStax Graph CQL Conversion to Graph - start here to see how to convert
-  an existing CQL keyspace into a graph.
+* DataStax Graph CQL as Graph - start here to use CQL to create a
+  new graph.
+* DataStax Graph CQL Conversion to Graph - start here to see how
+  to convert an existing CQL keyspace into a graph.
 
-The Studio sample notebook can be found under the directory:
-./studio-getting-started-guide-notebook
-
-See the instructions under the DataStax Studio section further down in
-this file to use these notebooks.
+The Studio sample notebooks are already embedded in the Studio Docker
+image and will be visible once the container is running.
 
 ### Classic Graph Schema Migration Example
 
@@ -51,112 +53,68 @@ experimental graph engine included in DataStax Labs, please contact a
 DataStax Services professional and a member of DataStax's Graph
 Practice will be in touch to discuss how DataStax can help.
 
-A simple migration example is available for review in this package.
-Please review the file ./graph-migration/README.md
+A simple migration example is available for review in this repo.
+Please review the contents under [.graph-migration](./graph-migration/).
 
-## Installation
-
-### Prerequisites
-
-* Platform: Linux or MacOS (Studio can run on Windows but DSE server cannot)
-* Java: Java 8 (1.8.0_151 minimum; Java 9 or higher not supported)
-* Python: 2.7.x
+## Using Labs Docker Images
 
 ### DataStax Enterprise
 
-DataStax Enterprise Server is provided in tarball format for this labs
-preview. To install you will follow similar instructions as explained
-here for the latest released DSE which is version 6.7:
-<https://docs.datastax.com/en/install/6.7/install/installTARdse.html>
+To download and run the DataStax Enterprise Labs Docker image:
 
-In summary you will need to first expand the DSE tarball:
+    docker run -e DS_LICENSE=accept --name my-dse -d datastax/labs-dse-graph-experimental -s -k -g
 
-    tar xvzf dse-6.8.0*.tar.gz
-
-Then make the default directories and change their ownership to the
-current running user:
-
-    sudo mkdir /var/{log,lib}/{dsefs,spark,cassandra}
-    sudo mkdir /var/lib/spark/{rdd,worker}
-    sudo chown -R $USER:$GROUP /var/{log,lib}/{dsefs,spark,cassandra}
-
-Alternatively, if you want to use different directory locations, see
-the 6.7 documentation referenced above.
-
-Finally you can start DSE with DataStax Graph enabled:
-
-    cd dse-6.8.0*
-    bin/dse cassandra -g
-
-To get the most value out of DataStax Graph, DSE Search is also
-recommended to be enabled.
-
-To start DSE with DataStax Graph and DSE Search enabled, run this
-command instead:
-
-    cd dse-6.8.0*
-    bin/dse cassandra -s -g
-
-To leverage DSEGraphFrames or any other analytical tool, like Gremlin
-OLAP, run this command instead:
-
-    cd dse-6.8.0*
-    bin/dse cassandra -s -g -k
+This will start DataStax Enterprise Server with Graph, Search and
+Analytics running (the recommended combination).
 
 After a few minutes, DSE should be running. You can confirm this with
 a nodetool status command:
 
-    bin/nodetool status
+    docker exec -it my-dse dsetool status
 
 In the status message you should see confirmation that the single node
 is running and that Graph mode is enabled:
 
-    DC: Graph           Workload: Cassandra       Graph: yes
-    =======================================================
+    DC: dc1         Workload: SearchAnalytics Graph: yes    Analytics Master: 172.17.0.2
+    ====================================================================================
     Status=Up/Down
     |/ State=Normal/Leaving/Joining/Moving
-    --   Address     Load         Owns    Token                   Rack    Health [0,1]
-    UN   127.0.0.1   103.21 KiB   ?       -5463528168999689403    rack1   0.50
+    --   Address      Load         Effective-Ownership  Token                  Rack     Health [0,1]
+    UN   172.17.0.2   124.07 KiB   100.00%              -2702044001711757463   rack1    0.20
+
+Refer to [datastax/dse-server][2] for more details about running
+DataStax Enterprise Server in a Docker container.
 
 ### DataStax Studio
 
-DataStax Studio is provided in tarball format for this labs preview. To
-install you will follow similar instructions as explained here for the
-latest released Studio which is version 6.7:
-<https://docs.datastax.com/en/install/6.7/install/installStudio.html>
+To download and run the DataStax Studio Labs Docker image:
 
-Important: If an earlier version of DataStax Studio is already
-installed, back up the user data directory before you install the labs
-version. The user data directory is normally located under
-`user_home_directory/.datastax_studio` (see the docs linked above for
-details).
+    docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastax/labs-dse-graph-studio-experimental
 
-In summary you will need to first expand the Studio tarball:
+This will start DataStax Studio and connect it with the running
+DataStax Enterprise Server Docker container.
 
-    tar xvzf datastax-studio-6.8.0*.tar.gz
+Once Studio has started it should be viewable in a browser at: <http://DOCKER_HOST_IP:9091>
 
-Next start the Studio server:
+Refer to [datastax/dse-studio][3] for more details about running
+DataStax Studio in a Docker container.
 
-    cd datastax-studio-6.8.0*
-    bin/server.sh
+### Java and Python Drivers
 
-Once Studio is running it should report a status message similar to:
-
-    Studio is now running at: http://127.0.0.1:9091
-
-Finally, to access DataStax Studio, switch to your web browser and
-access this URL: <http://URI_running_DSE:9091/>
-
-For DSE running on localhost, the URI will be `localhost`. When DSE is
-running on a different machine, the URI will be the hostname or IP
-address for the remote machine.
+To write your own applications which work with the DataStax Graph Labs
+preview, you'll need special Labs versions of the Java and Python
+drivers. Visit the [DataStax Labs][1] website and download DataStax
+Graph (DSG). Then expand the `graph-labs.zip` file and continue with
+the appropriate section below.
 
 ### Java Driver
 
-To use the Java driver with your application, follow these instructions.
+To use the Java driver with your application, follow these
+instructions.
 
-Unpack the `dse-java-driver.tar.gz` file. You should see the following
-contents under the newly-created `dse-java-driver` folder:
+Find the `dse-java-driver.tar.gz` file and expand it. You should see
+the following contents under the newly-created `dse-java-driver`
+folder:
 
     # Core DSE driver
     dse-java-driver-core-1.8.1.20190510-LABS.jar
@@ -181,7 +139,12 @@ in your Maven or Gradle build. Refer to Maven's [Guide to installing
 
 ### Python Driver
 
-To use the Python driver with your application, follow these instructions.
+To use the Python driver with your application, follow these
+instructions.
+
+Find the `dse-java-driver.tar.gz` file and expand it. You should see
+`dse-driver*.tar.gz` and`dse-graph*.tar.gz` files. These do not need
+to be expanded.
 
 A virtual environment is recommended, especially so that these Labs
 drivers don't mix or conflict with any released drivers on the same
@@ -211,3 +174,7 @@ We want to hear your feedback! Go to the Labs section of the new
 
 You can also reach out on the Labs forums for any help needed with
 these installation steps.
+
+[1]: https://downloads.datastax.com/#labs
+[2]: https://hub.docker.com/r/datastax/dse-server
+[3]: https://hub.docker.com/r/datastax/dse-studio
