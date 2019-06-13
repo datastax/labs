@@ -12,8 +12,8 @@ docker run -e DS_LICENSE=accept --name my-dse -p 9042:9042 -d datastax/labs:dse-
 docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastax/labs:dse-graph-studio-experimental
 ```
 
-# Documentation
-For detailed documentation on using these images please visit the [DataStax Lab Github](https://github.com/datastax/labs) page.
+# Compose Example
+Use the docker compose example provided in this repo to automate provising of a single Graph node and single Studio node 
 
 # Support
 Images contained in this repository are not intended for production use and are not "Supported Software" under any DataStax subscriptions or other agreements.
