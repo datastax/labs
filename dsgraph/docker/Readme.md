@@ -2,15 +2,7 @@
 
 To run the Labs docker images you must accept the [DataStax Labs Term](https://www.datastax.com/terms/datastax-labs-terms) by using the environmental variable DS_LICENSE.
 
-To Start the images use the following commands 
-
-```
-docker run -e DS_LICENSE=accept --name my-dse -p 9042:9042 -d datastax/labs:dse-graph-experimental -s -k -g
-```
-
-```
-docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastax/labs:dse-graph-studio-experimental
-```
+DataStax Graph and Studio images are found in [Docker Hub](https://cloud.docker.com/u/datastax/repository/docker/datastax/labs)
 
 To download and run the DataStax Graph Labs Docker image:
 
