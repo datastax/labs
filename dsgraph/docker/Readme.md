@@ -48,7 +48,7 @@ Configure the connection to the DataStax Enterprise Server:
 5. Click Save
 
 # Compose Example
-Use the docker compose example provided in this repo to automate provising of a single Graph node and single Studio node 
+Use the [docker compose example](https://github.com/datastax/labs/blob/master/dsgraph/docker/docker-compose.yml) provided in this repo to automate provising of a single Graph node and single Studio node 
 
 # Support
 Images contained in this repository are not intended for production use and are not "Supported Software" under any DataStax subscriptions or other agreements.
