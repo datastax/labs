@@ -1,6 +1,6 @@
 version: '2'
 services:
-  node:
+  my-dse:
     image: "datastax/labs:dse-graph-experimental"
     environment:
       - DS_LICENSE=accept
@@ -23,8 +23,7 @@ services:
     - "9042:9042"
     - "10000:10000"
 
-
-  studio:
+  my-studio:
     image: "datastax/labs:dse-graph-studio-experimental"
     environment:
       - DS_LICENSE=accept

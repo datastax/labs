@@ -4,6 +4,8 @@ To run the Labs docker images you must accept the [DataStax Labs Term](https://w
 
 DataStax Graph and Studio images are found in [Docker Hub](https://cloud.docker.com/u/datastax/repository/docker/datastax/labs)
 
+## DataStax Enterprise Server
+
 To download and run the DataStax Graph Labs Docker image:
 
     docker run -e DS_LICENSE=accept --name my-dse -d datastax/labs:dse-graph-experimental -s -k -g
@@ -27,8 +29,7 @@ is running and that Graph mode is enabled:
     UN   172.17.0.2   124.07 KiB   100.00%              -2702044001711757463   rack1    0.20
 
 
-
-### DataStax Studio
+## DataStax Studio
 
 To download and run the DataStax Studio Labs Docker image:
 
@@ -48,13 +49,23 @@ Configure the connection to the DataStax Enterprise Server:
 5. Click Save
 
 # Compose Example
-Use the [docker compose example](https://github.com/datastax/labs/blob/master/dsgraph/docker/docker-compose.yml) provided in this repo to automate provising of a single Graph node and single Studio node 
+
+Use the [docker compose example](https://github.com/datastax/labs/blob/master/dsgraph/docker/docker-compose.yml) provided in this repo to automate provisioning of a single Graph node and single Studio node 
+
+From the `./dsgraph/docker/` directory, you can bring up or down the combined environment:
+
+    docker-compose up -d
+    docker-compose down
+
+Then follow the example steps listed above for working with DataStax Enterprise and DataStax Studio.
 
 # Support
+
 Images contained in this repository are not intended for production use and are not "Supported Software" under any DataStax subscriptions or other agreements.
 
 Join the [DataStax Community](https://community.datastax.com/spaces/11/index.html) to connect with peers who can help you out in sticky situations and give you pointers.
-Please visit  [DataStax Lab Github](https://github.com/datastax/labs) to file any issues encountered
+Please visit [DataStax Lab GitHub](https://github.com/datastax/labs) to file any issues encountered
 
 # Next Steps
+
 Head over to the [DataStax Academy](https://academy.datastax.com/) for free training and tutorials.
