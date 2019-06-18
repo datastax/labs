@@ -1,6 +1,6 @@
 # Getting Started
 
-To run the Labs docker images you must accept the [DataStax Labs Term](https://www.datastax.com/terms/datastax-labs-terms) by using the environmental variable DS_LICENSE.
+To run the Labs docker images you must accept the [DataStax Labs Terms](https://www.datastax.com/terms/datastax-labs-terms) by using the environmental variable DS_LICENSE.
 
 DataStax Graph and Studio images are found in [Docker Hub](https://cloud.docker.com/u/datastax/repository/docker/datastax/labs)
 
@@ -48,7 +48,7 @@ Configure the connection to the DataStax Enterprise Server:
 4. Click Test to confirm the connection
 5. Click Save
 
-# Compose Example
+# Docker Compose Example
 
 Use the [docker compose example](https://github.com/datastax/labs/blob/master/dsgraph/docker/docker-compose.yml) provided in this repo to automate provisioning of a single Graph node and single Studio node 
 
@@ -63,8 +63,7 @@ Then follow the example steps listed above for working with DataStax Enterprise 
 
 Images contained in this repository are not intended for production use and are not "Supported Software" under any DataStax subscriptions or other agreements.
 
-Join the [DataStax Community](https://community.datastax.com/spaces/11/index.html) to connect with peers who can help you out in sticky situations and give you pointers.
-Please visit [DataStax Lab GitHub](https://github.com/datastax/labs) to file any issues encountered
+Join the [DataStax Community](https://community.datastax.com/spaces/11/index.html) to connect with peers who can help you out in sticky situations and give you pointers. You can also file issues here in this repo for any problems encountered.
 
 # Next Steps
 
