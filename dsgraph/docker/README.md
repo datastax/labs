@@ -54,15 +54,15 @@ Use the [docker compose example](https://github.com/datastax/labs/blob/master/ds
 To use the sample `docker-compose.yaml` file, you must first signal your acceptance of the [DataStax Labs Terms](https://www.datastax.com/terms/datastax-labs-terms) by uncommenting the `DS_LICENSE` environment variable setting under both `my-dse` and `my-studio` sections:
 
     my-dse:
-    image: ...
-    environment:
-      - DS_LICENSE=accept
+      image: ...
+      environment:
+        - DS_LICENSE=accept
 
 
     my-studio:
-    image: ...
-    environment:
-      - DS_LICENSE=accept
+      image: ...
+      environment:
+        - DS_LICENSE=accept
 
 Then you can bring up or down the combined environment with Docker Compose commands:
 
