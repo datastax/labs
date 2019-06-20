@@ -107,7 +107,31 @@ Configure the connection to the DataStax Enterprise Server:
 Refer to [datastax/dse-studio][3] for more details about running
 DataStax Studio in a Docker container.
 
-### Java and Python Drivers
+### Docker Compose Example
+
+Use the Docker Compose example file `docker-compose.yml` provided in this repo to automate provisioning of a single DSE Graph node with a single Studio node.
+
+To use Docker Compose you must first signal your acceptance of the [DataStax Labs Terms](https://www.datastax.com/terms/datastax-labs-terms) by uncommenting the `DS_LICENSE` environment variable setting under both `my-dse` and `my-studio` sections:
+
+    my-dse:
+      image: ...
+      environment:
+        - DS_LICENSE=accept
+
+
+    my-studio:
+      image: ...
+      environment:
+        - DS_LICENSE=accept
+
+The combined environment can be brought up or torn down with Docker Compose commands:
+
+    docker-compose up -d
+    docker-compose down
+
+Then follow the example steps listed above for working with DataStax Enterprise and DataStax Studio.
+
+## Java and Python Drivers
 
 To write your own applications which work with the DataStax Graph Labs
 preview, you'll need special Labs versions of the Java and Python
@@ -180,8 +204,7 @@ drivers are loadable:
 We want to hear your feedback! Go to the Labs section of the new
 [DataStax Community forums](https://community.datastax.com/spaces/11/index.html).
 
-You can also reach out on the Labs forums for any help needed with
-these installation steps.
+You can also file [issues](https://github.com/datastax/labs/issues) here in this repo for any problems encountered.
 
 [1]: https://downloads.datastax.com/#labs
 [2]: https://hub.docker.com/r/datastax/dse-server
