@@ -28,7 +28,6 @@ is running and that Graph mode is enabled:
     --   Address      Load         Effective-Ownership  Token                  Rack     Health [0,1]
     UN   172.17.0.2   124.07 KiB   100.00%              -2702044001711757463   rack1    0.20
 
-
 ## DataStax Studio
 
 To download and run the DataStax Studio Labs Docker image:
@@ -50,9 +49,22 @@ Configure the connection to the DataStax Enterprise Server:
 
 # Docker Compose Example
 
-Use the [docker compose example](https://github.com/datastax/labs/blob/master/dsgraph/docker/docker-compose.yml) provided in this repo to automate provisioning of a single Graph node and single Studio node 
+Use the [docker compose example](https://github.com/datastax/labs/blob/master/dsgraph/docker/docker-compose.yml) provided in this repo to automate provisioning of a single Graph node and single Studio node.
 
-From the `./dsgraph/docker/` directory, you can bring up or down the combined environment:
+To use the sample `docker-compose.yaml` file, you must first signal your acceptance of the [DataStax Labs Terms](https://www.datastax.com/terms/datastax-labs-terms) by uncommenting the `DS_LICENSE` environment variable setting under both `my-dse` and `my-studio` sections:
+
+    my-dse:
+    image: ...
+    environment:
+      - DS_LICENSE=accept
+
+
+    my-studio:
+    image: ...
+    environment:
+      - DS_LICENSE=accept
+
+Then you can bring up or down the combined environment with Docker Compose commands:
 
     docker-compose up -d
     docker-compose down

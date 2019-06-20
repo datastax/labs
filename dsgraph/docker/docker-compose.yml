@@ -2,8 +2,8 @@ version: '2'
 services:
   my-dse:
     image: "datastax/labs:dse-graph-experimental"
-    environment:
-      - DS_LICENSE=accept
+#    environment:
+#      - DS_LICENSE=accept
     command:
      -k
      -s
@@ -25,7 +25,7 @@ services:
 
   my-studio:
     image: "datastax/labs:dse-graph-studio-experimental"
-    environment:
-      - DS_LICENSE=accept
+#    environment:
+#      - DS_LICENSE=accept
     ports:
     - "9091:9091"
