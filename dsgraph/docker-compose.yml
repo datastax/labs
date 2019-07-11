@@ -1,6 +1,7 @@
 version: '2'
 services:
-  my-dse:
+  dse:
+    container_name: my-dse
     image: "datastax/labs:dse-graph-experimental"
 #    environment:
 #      - DS_LICENSE=accept
@@ -23,7 +24,8 @@ services:
     - "9042:9042"
     - "10000:10000"
 
-  my-studio:
+  studio:
+    container_name: my-studio
     image: "datastax/labs:dse-graph-studio-experimental"
 #    environment:
 #      - DS_LICENSE=accept
