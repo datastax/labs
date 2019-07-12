@@ -7,6 +7,9 @@ For the downloadable tarball version of the Graph preview, refer to
 the [DataStax Labs][1] website and download DataStax Graph (DSG). Then
 follow the instructions with the included README.md from the download.
 
+The use of the software described here is subject to the [DataStax Labs
+Terms][4].
+
 ## What's New and Documentation
 
 The new, experimental graph engine included in this Labs package
@@ -58,6 +61,14 @@ Please review the contents under [graph-migration](./graph-migration/).
 
 ## Using Labs Docker Images
 
+Note: We intentionally do not have a 'latest' tag on the Labs Docker
+images. Instead they are version tagged to ensure you're using the
+intended preview version. See the examples below.
+
+To run the Docker examples you must accept and agree to the [DataStax
+Labs Terms][4]. Setting the `DS_LICENSE` variable as shown below
+indicates your acceptance of those terms.
+
 ### DataStax Enterprise
 
 To download and run the DataStax Enterprise Labs Docker image:
@@ -67,7 +78,7 @@ To download and run the DataStax Enterprise Labs Docker image:
 This will start DataStax Enterprise Server with Graph, Search and
 Analytics running (the recommended combination).
 
-After a few minutes, DSE should be running. You can confirm this with
+After several minutes, DSE should be running. You can confirm this with
 a nodetool status command:
 
     docker exec -it my-dse dsetool status
@@ -109,13 +120,13 @@ DataStax Studio in a Docker container.
 
 ### Docker Compose Example
 
-Use the Docker Compose example file `docker-compose.yml` provided in this repo to automate provisioning of a single DSE Graph node with a single Studio node.
+Use the Docker Compose example file `docker-compose.yml` provided in
+this repo to automate provisioning of a single DSE Graph node with a
+single Studio node.
 
 To use Docker Compose you must first signal your acceptance of the
-[DataStax Labs
-Terms](https://www.datastax.com/terms/datastax-labs-terms) by
-uncommenting the `DS_LICENSE` environment variable setting under both
-`dse` and `studio` sections:
+[DataStax Labs Terms][4] by uncommenting the `DS_LICENSE` environment
+variable setting under both `dse` and `studio` sections:
 
     dse:
       image: ...
@@ -156,3 +167,4 @@ these installation steps.
 [1]: https://downloads.datastax.com/#labs
 [2]: https://hub.docker.com/r/datastax/dse-server
 [3]: https://hub.docker.com/r/datastax/dse-studio
+[4]: https://www.datastax.com/terms/datastax-labs-terms
