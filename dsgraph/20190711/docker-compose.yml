@@ -2,7 +2,7 @@ version: '2'
 services:
   dse:
     container_name: my-dse
-    image: "datastax/labs:dse-graph-experimental"
+    image: "datastaxlabs/datastax-graph:6.8.0.20190516"
 #    environment:
 #      - DS_LICENSE=accept
     command:
@@ -26,7 +26,7 @@ services:
 
   studio:
     container_name: my-studio
-    image: "datastax/labs:dse-graph-studio-experimental"
+    image: "datastaxlabs/datastax-studio:6.8.0.20190521"
 #    environment:
 #      - DS_LICENSE=accept
     ports:
