@@ -62,7 +62,7 @@ Please review the contents under [graph-migration](./graph-migration/).
 
 To download and run the DataStax Enterprise Labs Docker image:
 
-    docker run -e DS_LICENSE=accept --name my-dse -d datastaxlabs/datastax-graph:6.8.0.20190516 -s -k -g
+    docker run -e DS_LICENSE=accept --name my-dse -d datastaxlabs/datastax-graph:6.8.0.20190711 -s -k -g
 
 This will start DataStax Enterprise Server with Graph, Search and
 Analytics running (the recommended combination).
@@ -89,7 +89,7 @@ DataStax Enterprise Server in a Docker container.
 
 To download and run the DataStax Studio Labs Docker image:
 
-    docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastaxlabs/datastax-studio:6.8.0.20190521
+    docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastaxlabs/datastax-studio:6.8.0.6.8.0.20190711
 
 This will start DataStax Studio and connect it with the running
 DataStax Enterprise Server Docker container.
