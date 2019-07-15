@@ -107,14 +107,6 @@ DataStax Enterprise Server Docker container.
 
 Once Studio has started it should be viewable in a browser at: <http://DOCKER_HOST_IP:9091>
 
-Configure the connection to the DataStax Enterprise Server:
-
-1. From the action menu in the upper left, choose Connections
-2. Click on the 'default localhost' connection
-3. In the Host/IP field enter "my-dse"
-4. Click Test to confirm the connection
-5. Click Save
-
 Refer to [datastax/dse-studio][3] for more details about running
 DataStax Studio in a Docker container.
 
