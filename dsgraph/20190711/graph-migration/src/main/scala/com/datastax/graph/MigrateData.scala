@@ -7,9 +7,9 @@
 package com.datastax.graph
 
 import com.datastax.bdp.graph.spark.graphframe._
-import com.datastax.bdp.graph.spark.graphframe.dsedb.NativeDseGraphFrame
-import com.datastax.bdp.graph.spark.graphframe.legacy.LegacyDseGraphFrame
-import com.datastax.bdp.graphv2.dsedb.schema.Column.{ColumnType => NativeColumnType, Type => NativeType}
+import com.datastax.bdp.graph.spark.graphframe.dsedb.CoreDseGraphFrame
+import com.datastax.bdp.graph.spark.graphframe.classic.ClassicDseGraphFrame
+import com.datastax.bdp.graphv2.dsedb.schema.Column.{ColumnType => CoreColumnType, Type => CoreType}
 import com.datastax.bdp.graphv2.engine.GraphKeyspace
 import com.datastax.bdp.graphv2.engine.GraphKeyspace.VertexLabel
 import org.apache.spark.sql._
@@ -49,32 +49,32 @@ object MigrateData {
     * the method should be overridden to match properties renamed during schema migration
     * default implementation assumes that property names was not changed and apply only toGfName function to it
     *
-    * @param property Native Graph property
+    * @param property Core Graph property
     * @return property name in provided Vertex and Edge dataframe
     */
-  def getLegacyPropertyName(property: GraphKeyspace.PropertyKey): String = {
+  def getClassicPropertyName(property: GraphKeyspace.PropertyKey): String = {
     DseGraphFrame.toGfName(property.name())
   }
 
   /**
     * this method should be overridden in case vertex ids were changed.
-    * The default implementation assumes that vertex ids are the same and only call getLegacyPropertyName() for them
+    * The default implementation assumes that vertex ids are the same and only call getClassicPropertyName() for them
     * The method is used only during edge migration, additional steps are needed for vertex migration
-    * for example the method replace "src" column with a number of "in_" columumn for DSE native edge table.
+    * for example the method replace "src" column with a number of "in_" columumn for DSE core edge table.
     * @param df     to modify
-    * @param label  native vertex schema to extract id structure
-    * @param legacy legacy schema to extract legacy vertex id structure
+    * @param label  core vertex schema to extract id structure
+    * @param classic classic schema to extract classic vertex id structure
     * @param idName "src" or "dst"
-    * @return dataframe with added native vertex id columns and removed idName column
+    * @return dataframe with added core vertex id columns and removed idName column
     */
 
-  def addEdgeIdColumns(df: DataFrame, label: VertexLabel, legacy: LegacyDseGraphFrame, idName: String): DataFrame = {
-    val vertex = legacy.graphSchema.getVertex(label.name)
+  def addEdgeIdColumns(df: DataFrame, label: VertexLabel, classic: ClassicDseGraphFrame, idName: String): DataFrame = {
+    val vertex = classic.graphSchema.getVertex(label.name)
 
-    var newDf = LegacyDseGraphFrame.addNaturalVertexIdColumns(df, label.name(), legacy.graphSchema, col(idName))
+    var newDf = ClassicDseGraphFrame.addNaturalVertexIdColumns(df, label.name(), classic.graphSchema, col(idName))
     // we assumes that property names was not changed
     for (prop <- label.primaryPropertyKeys().asScala) {
-      newDf = newDf.withColumnRenamed(getLegacyPropertyName(prop), prop.column().get().name())
+      newDf = newDf.withColumnRenamed(getClassicPropertyName(prop), prop.column().get().name())
     }
     newDf.drop(idName)
   }
@@ -84,22 +84,22 @@ object MigrateData {
     * For example  after applying custom rules for multi and meta properties.
     *
     * @param vertices        vertices Dataframe
-    * @param nativeGraphName target graph
+    * @param coreGraphName target graph
     * @param spark           current spark session
     */
-  def migrateVertices(legacy: LegacyDseGraphFrame, native: NativeDseGraphFrame, spark: SparkSession): Unit = {
-    val vertices = legacy.V.df
+  def migrateVertices(classic: ClassicDseGraphFrame, core: CoreDseGraphFrame, spark: SparkSession): Unit = {
+    val vertices = classic.V.df
 
     // vertex labels to enumerate
-    val vertexLabels: Seq[GraphKeyspace.VertexLabel] = native.graphSchema.vertexLabels().asScala.toSeq
+    val vertexLabels: Seq[GraphKeyspace.VertexLabel] = core.graphKeyspace.vertexLabels().asScala.toSeq
     val dfSchema = vertices.schema
     for (vertexLabel: GraphKeyspace.VertexLabel <- vertexLabels) {
-      //prepare native vertex columns for this label
+      //prepare core vertex columns for this label
       val propertyColumns = vertexLabel.propertyKeys().asScala.map((property: GraphKeyspace.PropertyKey) => {
-        val name: String = getLegacyPropertyName(property)
+        val name: String = getClassicPropertyName(property)
         val rawColumn: StructField = dfSchema(name)
         //  drop meta and multi properties. the method can be changed to return Seq[Column] if more then one column
-        // is created base on one legacy property
+        // is created base on one classic property
         val finalColumn = handleMultiAndMetaProperties(rawColumn)
         // Duration type representation is changed, the line could be removed if no Duration used in schema
         val scaleColumn = durationToNanoseconds(property.column().get.`type`(), finalColumn)
@@ -109,53 +109,53 @@ object MigrateData {
       // filter row and columns related to the given label
       val vertexDF = vertices.filter(col(DseGraphFrame.LabelColumnName) === vertexLabel.name())
         .select(propertyColumns: _*)
-      // save vertices in the native graph
-      native.updateVertices(vertexLabel.name(), vertexDF)
+      // save vertices in the core graph
+      core.updateVertices(vertexLabel.name(), vertexDF)
     }
   }
 
-  private def durationToNanoseconds(columnType: NativeColumnType, col: Column): Column = {
-    if (columnType == NativeType.Duration) col * 1000000 else col
+  private def durationToNanoseconds(columnType: CoreColumnType, col: Column): Column = {
+    if (columnType == CoreType.Duration) col * 1000000 else col
   }
 
   /**
     * Load edges separately.  The target schema should be created and modified before this call
     *
     * @param edges           edge Dataframe
-    * @param legacySchema    old graph scheama for id conversions. legacyGraph.schema() call returns it.
-    * @param nativeGraphName target graph
+    * @param classicSchema    old graph scheama for id conversions. classicGraph.schema() call returns it.
+    * @param coreGraphName target graph
     * @param spark           current spark session
     */
 
-  def migrateEdges(legacy: LegacyDseGraphFrame, native: NativeDseGraphFrame, spark: SparkSession): Unit = {
+  def migrateEdges(classic: ClassicDseGraphFrame, core: CoreDseGraphFrame, spark: SparkSession): Unit = {
     // it could be good to cache edges here
-    val edges = legacy.E.df
+    val edges = classic.E.df
 
     val dfSchema = edges.schema
     // enumerate all edge labels, actually triplets: out_vertex_label->edge_label->in_vertex_label
-    for (edgeLabel <- native.graphSchema.edgeLabels().asScala.toSeq) {
+    for (edgeLabel <- core.graphKeyspace.edgeLabels().asScala.toSeq) {
       val outLabelName = edgeLabel.outLabel.name()
       val edgeLabelName = edgeLabel.name()
       val inLabelName = edgeLabel.inLabel.name()
       val propertyColumns = edgeLabel.propertyKeys().asScala.map(property => {
-        // legacy edge internal property "id" is mapped to native "id" column
-        val name = if(property.name() == "id") "id" else getLegacyPropertyName(property)
+        // classic edge internal property "id" is mapped to core "id" column
+        val name = if(property.name() == "id") "id" else getClassicPropertyName(property)
         val scaleColumn = durationToNanoseconds(property.column().get.`type`(), col(name))
         scaleColumn as name
       })
-      // filter data for one native DSE-DB table
+      // filter data for one core DSE-DB table
       val singleEdgeTable = edges.filter(
         (col("~label") === edgeLabelName) and
           col("src").startsWith(outLabelName + ":") and
           col("dst").startsWith(inLabelName + ":"))
         .select((propertyColumns :+ col("src")) :+ col("dst"): _*)
       // replace "src" column with unpacked out_ columns
-      val unpackSrcTable = addEdgeIdColumns(singleEdgeTable, edgeLabel.outLabel, legacy, "src")
+      val unpackSrcTable = addEdgeIdColumns(singleEdgeTable, edgeLabel.outLabel, classic, "src")
       // replace "dst" column with unpacked in_ columns
-      val unpackDstTable = addEdgeIdColumns(unpackSrcTable, edgeLabel.inLabel, legacy, "dst")
+      val unpackDstTable = addEdgeIdColumns(unpackSrcTable, edgeLabel.inLabel, classic, "dst")
 
-      // save edges in the native graph
-      native.updateEdges(outLabelName, edgeLabelName, inLabelName, unpackDstTable)
+      // save edges in the core graph
+      core.updateEdges(outLabelName, edgeLabelName, inLabelName, unpackDstTable)
 
     }
   }
@@ -165,20 +165,20 @@ object MigrateData {
       usage();
       System.exit(-1);
     }
-    val legacyGraphName = args(0)
-    val nativeGraphName = args(1)
+    val classicGraphName = args(0)
+    val coreGraphName = args(1)
 
     val spark = SparkSession
       .builder
-      .appName(s"Migrate data from $legacyGraphName to $nativeGraphName")
+      .appName(s"Migrate data from $classicGraphName to $coreGraphName")
       .getOrCreate()
 
     try {
-      val legacy = spark.dseGraph(legacyGraphName).asInstanceOf[LegacyDseGraphFrame]
-      val native = spark.dseGraph(nativeGraphName).asInstanceOf[NativeDseGraphFrame]
+      val classic = spark.dseGraph(classicGraphName).asInstanceOf[ClassicDseGraphFrame]
+      val core = spark.dseGraph(coreGraphName).asInstanceOf[CoreDseGraphFrame]
 
-      migrateVertices(legacy, native, spark)
-      migrateEdges(legacy, native, spark)
+      migrateVertices(classic, core, spark)
+      migrateEdges(classic, core, spark)
 
     } catch {
       case e: Exception => {
@@ -190,7 +190,7 @@ object MigrateData {
     }
   }
   def usage(): Unit = {
-    println("\nUsage: data_migration legacyGraphName nativeGraphName")
+    println("\nUsage: data_migration classicGraphName coreGraphName")
   }
 
 }
