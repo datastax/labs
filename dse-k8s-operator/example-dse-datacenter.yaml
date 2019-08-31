@@ -1,0 +1,27 @@
+apiVersion: datastax.com/v1alpha1
+kind: DseDatacenter
+metadata:
+  name: dc1
+spec:
+  dseClusterName: cluster1
+  size: 3
+  storageclaim:
+    storageclassname: dse-storage
+    resources:
+      requests:
+        storage: 20Gi
+  racks:
+    - name: r1
+    - name: r2
+    - name: r3
+  config:
+    dse-yaml:
+      authentication_options:
+        enabled: False
+    #cassandra-yaml:
+    #  num_tokens: 32
+    #jvm-options:
+    #  initial_heap_size: "16g"
+    #  max_heap_size: "16g"
+    #10-write-prom-conf:
+    #  enabled: True
