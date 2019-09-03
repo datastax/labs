@@ -1,0 +1,7 @@
+#
+# The use of the software described here is subject to the DataStax Labs Terms
+# [https://www.datastax.com/terms/datastax-labs-terms]
+#
+
+your-setting:
+  a: "value-integration"
