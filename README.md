@@ -14,6 +14,10 @@ Refer to the [dsgraph](dsgraph) directory.
 
 Refer to the [dse-k8s-operator](dse-k8s-operator) directory.
 
+### DataStax Java Driver Spring Boot Starter Labs
+
+Refer to the [spring-boot-starter](./spring-boot-starter) directory.
+
 ## Support
 
 The code, examples, and snippets provided in this repository are not
