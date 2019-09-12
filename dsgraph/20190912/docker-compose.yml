@@ -1,0 +1,33 @@
+version: '2'
+services:
+  dse:
+    container_name: my-dse
+    image: "datastaxlabs/datastax-graph:6.8.0.20190912"
+#    environment:
+#      - DS_LICENSE=accept
+    command:
+     -k
+     -s
+     -g
+    # Allow DSE to lock memory with mlock
+    cap_add:
+    - IPC_LOCK
+    ulimits:
+      memlock: -1
+    ports:
+    - "4040:4040"
+    - "7080:7080"
+    - "7077:7077"
+    - "7199:7199"
+    - "8182:8182"
+    - "8983:8983"
+    - "9042:9042"
+    - "10000:10000"
+
+  studio:
+    container_name: my-studio
+    image: "datastaxlabs/datastax-studio:6.8.0.20190912"
+#    environment:
+#      - DS_LICENSE=accept
+    ports:
+    - "9091:9091"
