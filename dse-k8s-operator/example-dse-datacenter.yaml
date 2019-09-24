@@ -4,6 +4,8 @@ metadata:
   name: dc1
 spec:
   dseClusterName: cluster1
+  repository: datastaxlabs/dse-k8s-server
+  version: 6.8.0-20190822
   size: 3
   storageclaim:
     storageclassname: dse-storage
