@@ -65,6 +65,7 @@ rules:
   - get
   - list
   - watch
+  - create
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -113,6 +114,12 @@ spec:
                 in the same Kubernetes namespace, they will join together in a multi-datacenter
                 DSE cluster.
               type: string
+            dseImage:
+              description: 'DSE container image name. More info: https://kubernetes.io/docs/concepts/containers/images'
+              type: string
+            dseVersion:
+              description: DSE version number
+              type: string
             configBuilderImage:
               description: Container image for the DSE config builder init container,
                 with host, path, and tag
@@ -137,9 +144,6 @@ spec:
                 - name
                 type: object
               type: array
-            repository:
-              description: DSE container image repository, with host and path
-              type: string
             resources:
               description: Kubernetes resource requests and limits, per DSE pod
               type: object
@@ -158,13 +162,9 @@ spec:
               required:
               - storageclassname
               type: object
-            version:
-              description: DSE container image tag
-              type: string
           required:
           - size
-          - version
-          - repository
+          - dseVersion
           - dseClusterName
           type: object
         status:
