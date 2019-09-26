@@ -4,7 +4,7 @@
 
 1. Install Docker
 2. Install Docker Compose
-3. Download kafaka-connect-dse-2.0.0-20190925-LABS.jar from DataStax Labs
+3. Download kafaka-connect-dse-2.0.0-20190925-LABS.jar from [DataStax Labs]() and place it within this directory.
 
 ## Start the components
 3. Start up the stack `docker-compose up -d`
@@ -57,6 +57,8 @@
 
     Name: demo-connector
     Tasks max: 1
+    Key converter class: JsonConverter
+    Value converter class: JsonConverter
     topic: demo-topic
     destination: demo_destination
     contact_points: dse
