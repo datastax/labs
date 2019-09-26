@@ -1,0 +1,10 @@
+{
+  "name": "dse-connector-json-multi-table-example",
+  "config": {
+    "connector.class": "com.datastax.kafkaconnector.source.DseSourceConnector",
+    "tasks.max": "10",
+    "topics": "dse-cdc-demo",
+    "destination": "demo",
+    "contactPoints": "dse"
+  }
+}
