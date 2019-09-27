@@ -146,3 +146,28 @@ messages.
    * Timestamp: Microsecond timestamp of the mutation converted to milliseconds
    * Headers: Includes the keyspace name, table name, and replication type
      (INSERT, UPDATE, or DELETE)
+
+## Limitations
+* The DSE Kafka Connector with CDC is not recommended nor supported for
+  production use. This release is an early preview of an unfinished product
+  intended to allow proof of concept deployments and to facilitate early
+  customer feedback into the software development process.
+* The DSE Kafka Connector with CDC is compatible with DSE 6.8.0 and above. It
+  will not function with prior releases of DSE. Furthermore, version 2.0.0-LABS
+  of the connector is compatible only with a specific DSE docker image co-hosted
+  in the labs Docker Hub repository. Other labs releases of DSE 6.8.0 will not
+  function with the connector.
+* Messages are replicated AFTER the mutation is fsync'd out to disk within the
+  commitlog. By default this is every `10` seconds. This may be adjusted by
+  changing the value of "commitlog_sync_period_in_ms" in cassandra.yaml. With an
+  appropriate storage device backing your commitlog (read: SSD) values in the
+  500ms to 3000ms are permitted.
+* The DSE Kafka connector with CDC is built on the foundations of DataStax
+  Enterprise Advanced Replication. With that in mind non-frozen collections and
+  user-defined types are **NOT** supported. See the Advanced Replication [Data
+  Types](https://docs.datastax.com/en/dse/6.7/dse-dev/datastax_enterprise/advReplication/advRepDataTypes.html)
+  documentation for more information. 
+* At this time it is not possible to run both Cassandra and Kafka CDC based
+  Advanced Replication destinations simultaneously. To prevent any issues from
+  occurring Cassandra based replication within DSE Advanced Replication is
+  disabled.
