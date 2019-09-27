@@ -131,16 +131,6 @@ services:
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
 
-  ksql-cli:
-    image: confluentinc/cp-ksql-cli:5.3.1
-    container_name: ksql-cli
-    depends_on:
-      - broker
-      - connect
-      - ksql-server
-    entrypoint: /bin/sh
-    tty: true
-
   rest-proxy:
     image: confluentinc/cp-kafka-rest:5.3.1
     depends_on:
