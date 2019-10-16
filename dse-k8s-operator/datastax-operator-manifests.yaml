@@ -200,7 +200,7 @@ spec:
       containers:
         - name: dse-operator
           # FIXME Replace this with the built image name
-          image: datastax/dse-operator:latest
+          image: datastaxlabs/dse-k8s-operator:0.3.0-20190822
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE

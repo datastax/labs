@@ -152,11 +152,8 @@ messages.
   production use. This release is an early preview of an unfinished product
   intended to allow proof of concept deployments and to facilitate early
   customer feedback into the software development process.
-* The DSE Kafka Connector with CDC is compatible with DSE 6.8.0 and above. It
-  will not function with prior releases of DSE. Furthermore, version 2.0.0-LABS
-  of the connector is compatible only with a specific DSE docker image co-hosted
-  in the labs Docker Hub repository. Other labs releases of DSE 6.8.0 will not
-  function with the connector.
+* The DSE Kafka Connector with CDC is compatible only with a specific DSE docker
+  image co-hosted in the labs Docker Hub repository.
 * Messages are replicated AFTER the mutation is fsync'd out to disk within the
   commitlog. By default this is every `10` seconds. This may be adjusted by
   changing the value of "commitlog_sync_period_in_ms" in cassandra.yaml. With an

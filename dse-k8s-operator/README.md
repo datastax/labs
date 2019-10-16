@@ -22,6 +22,7 @@ namespace. Create a namespace for the cluster with:
 ```shell
 $ kubectl create ns my-dse-ns
 ```
+
 For the rest of this guide, we will be using the namespace `my-dse-ns`. Adjust
 further commands as necessary to match the namespace you defined.
 
@@ -93,9 +94,7 @@ NAME                               READY   STATUS    RESTARTS   AGE
 dse-operator-f74447c57-kdf2p       1/1     Running   0          1h
 ```
 
-When the pod status is `Running`, the operator is ready to use. _Note the
-individual component resources are also available for review outside of the
-merged format within this repository._
+When the pod status is `Running`, the operator is ready to use.
 
 # Provision a DSE cluster
 
@@ -200,7 +199,7 @@ spec:
         enabled: False
     #cassandra-yaml:
     #  num_tokens: 32
-    #jvm-options:
+    #jvm-server-options:
     #  initial_heap_size: "16g"
     #  max_heap_size: "16g"
     #10-write-prom-conf:
@@ -297,12 +296,8 @@ this time.
    release is an early preview of an unfinished product intended to allow proof
    of concept deployments and to facilitate early customer feedback into the
    software development process.
-2. The operator is compatible with DSE 6.8.0 and above. It will not function
-   with prior releases of DSE. Furthermore, version 0.3.0 of the operator is
-   compatible only with a specific DSE docker image co-hosted in the labs
-   [Docker Hub
-   repository](https://cloud.docker.com/u/datastaxlabs/repository/docker/datastaxlabs/dse-k8s-server).
-   Other labs releases of DSE 6.8.0 will not function with the operator.
+2. The DSE Kubernetes Operator is compatible only with a specific DSE docker 
+   image co-hosted in the labs Docker Hub repository.
 3. The operator is compatible with DSE and the Cassandra workload only. It does
    not support DDAC or Advanced Workloads like Analytics, Graph, and Search.
 4. There is no facility for multi-region DSE clusters. The operator functions
