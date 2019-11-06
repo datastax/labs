@@ -12,8 +12,8 @@ metadata:
 spec:
   dseClusterName: demo-cluster
   size: 1
-  repository: datastaxlabs/dse-k8s-server:6.8.0-20190822
-  dseVersion: 6.8.0
+  repository: datastaxlabs/dse-k8s-server
+  version: 6.8.0-20190822
   storageclaim:
     storageclassname: dse-storage
     resources:
