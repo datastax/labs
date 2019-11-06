@@ -108,21 +108,15 @@ spec:
           type: object
         spec:
           properties:
+            configBuilderImage:
+              description: Container image for the DSE config builder init container,
+                with host, path, and tag
+              type: string
             dseClusterName:
               description: The name by which CQL clients and DSE instances will know
                 the DSE cluster. If the same cluster name is shared by multiple DseDatacenters
                 in the same Kubernetes namespace, they will join together in a multi-datacenter
                 DSE cluster.
-              type: string
-            dseImage:
-              description: 'DSE container image name. More info: https://kubernetes.io/docs/concepts/containers/images'
-              type: string
-            dseVersion:
-              description: DSE version number
-              type: string
-            configBuilderImage:
-              description: Container image for the DSE config builder init container,
-                with host, path, and tag
               type: string
             parked:
               description: Indicates no DSE nodes should run, like powering down bare
@@ -144,6 +138,9 @@ spec:
                 - name
                 type: object
               type: array
+            repository:
+              description: DSE container image repository, with host and path
+              type: string
             resources:
               description: Kubernetes resource requests and limits, per DSE pod
               type: object
@@ -162,9 +159,11 @@ spec:
               required:
               - storageclassname
               type: object
+            version:
+              description: DSE container image tag
+              type: string
           required:
           - size
-          - dseVersion
           - dseClusterName
           type: object
         status:
@@ -199,7 +198,6 @@ spec:
       serviceAccountName: dse-operator
       containers:
         - name: dse-operator
-          # FIXME Replace this with the built image name
           image: datastaxlabs/dse-k8s-operator:0.3.0-20190822
           imagePullPolicy: IfNotPresent
           env:
