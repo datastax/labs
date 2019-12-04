@@ -9,7 +9,7 @@ and managing DSE in a Kubernetes cluster.
 ## Prerequisites
 
 1. A Kubernetes cluster running version 1.13.0 or higher. The operator may
-   function with older releases, but formal verification is pending.
+   function with older releases, but certification is pending.
 2. The ability to download images from Docker Hub from within the Kubernetes
    cluster.
 3. At least one Kubernetes worker node per DSE instance.
@@ -30,10 +30,9 @@ further commands as necessary to match the namespace you defined.
 
 Kubernetes uses the `StorageClass` resource as an abstraction layer between pods
 needing persistent storage and the physical storage resources that a specific
-Kubernetes cluster can provide. For the 0.3.0 release of the DataStax Kubernetes
-Operator, we recommend using the fastest type of networked storage available. On
-Google Kubernetes Engine, the following example would define persistent network
-SSD-backed volumes.
+Kubernetes cluster can provide. We recommend using the fastest type of
+networked storage available. On Google Kubernetes Engine, the following
+example would define persistent network SSD-backed volumes.
 
 ```yaml
 apiVersion: storage.k8s.io/v1
@@ -70,7 +69,7 @@ following:
 1. `ServiceAccount`, `Role`, and `RoleBinding` to describe a user and set of
    permissions necessary to run the operator. _In demo environments that don't
    have role-based access-control enabled, these extra steps are unnecessary but
-   harmless._
+   are harmless._
 2. `CustomResourceDefinition` for the `DseDatacenter` resources used to
    configure clusters managed by the `dse-k8s-operator`.
 3. Deployment to start the operator in a state where it waits and watches for
@@ -78,9 +77,10 @@ following:
 
 Generally, `cluster-admin` privileges are required to register a
 `CustomResourceDefinition` (CRD). All privileges needed by the operator are
-present within the [role definition YAML](dse-role.yaml). _Note the operator
-does not require `cluster-admin` privileges, only the user defining the CRD
-requires those permissions._
+present within the
+[datastax-operator-manifests YAML](datastax-operator-manifests.yaml).
+_Note the operator does not require `cluster-admin` privileges, only the user
+defining the CRD requires those permissions._
 
 Apply the manifest above, and wait for the deployment to become ready. You can
 watch the progress by getting the list of pods for the namespace, as
@@ -99,10 +99,10 @@ When the pod status is `Running`, the operator is ready to use.
 # Provision a DSE cluster
 
 The previous section created a new resource type in your Kubernetes cluster, the
-`DseDatacenter`. By adding `DseDatacenter`s to your namespace, you can define a
-cluster topology for the DSE operator to create and monitor. In this guide, a
-three node cluster is provisioned, with one datacenter made up of three racks,
-with a total of one node per rack.
+`DseDatacenter`. By adding `DseDatacenter` resources to your namespace, you can
+define a cluster topology for the DSE operator to create and monitor. In this
+guide, a three node cluster is provisioned, with one datacenter made up of three
+racks, with a total of one node per rack.
 
 ## Cluster and Datacenter
 
@@ -110,7 +110,7 @@ A DSE logical datacenter is the primary resource managed by the
 dse-k8s-operator. Within a single Kubernetes namespace:
 
 - A single `DseDatacenter` resource defines a single-datacenter DSE cluster.
-- Two `DseDatacenter` resources with different `dseClusterName`'s define two
+- Two or more `DseDatacenter` resources with different `dseClusterName`'s define
   separate and unrelated single-datacenter DSE clusters. Note the operator
   manages both clusters since they reside within the same Kubernetes namespace.
 - Two or more `DseDatacenter` resources that share the same `dseClusterName`
@@ -126,7 +126,7 @@ For this guide, we define a single-datacenter cluster. The cluster is named
 DSE is rack-aware, and the `racks` parameter will configure the DSE operator to
 set up pods in a rack aware way. Note the Kubernetes worker nodes must have
 labels matching `failure-domain.beta.kubernetes.io/zone`. Racks must have
-identifiers in this guide we will use `r1`, `r2`, and `r3`.
+identifiers. In this guide we will use `r1`, `r2`, and `r3`.
 
 ## DSE Node Count
 
@@ -155,19 +155,91 @@ specify anything here at all. Settings that omitted from the `config` key will
 receive reasonable default values and its quite common to run demo clusters with
 no custom configuration of DSE.
 
-Omit parameters that have already been specified elsewhere in the
-`DseDatacenter` resource in the `config` section. For example, the
-`cluster_name` in cassandra.yaml is automatically filled in by the operator.
-Similarly, parameters that apply to an individual DSE instance like
-`initial_token` and `listen_address` are not appropriate as the operator manages
-these automatically.
+If you're familiar with configuring DSE outside of containers on traditional
+operating systems, you may recognize that some familiar configuration parameters
+have been specified elsewhere in the `DseDatacenter` resource, outside of the
+`config` section. These parameters should not be repeated inside of the config
+section, the operator will populate them from the `DseDatacenter` resource.
 
-It's worth noting a large number of keys and values can be specified in the
-`config` section, but the details currently not well documented. The `config`
-key data structure resembles the API for DataStax OpsCenter Lifecycle Manager
-(LCM) Configuration Profiles. Translating LCM config profile API payloads to
-this format is straightforward. Documentation of this section will be present in
-future releases.
+For example:
+* `cluster_name`, which is normally specified in `cassandra.yaml`
+* The rack and datacenter properties
+
+Similarly, the operator will automatically populate any values which must
+normally be customized on a per-DSE-instance basis. Do not specify these in the
+`DseDatacenter` resource. For example:
+basis
+* `initial_token`
+* `listen_address` and other ip-addresses.
+
+A large number of keys and values can be specified in the `config` section, but
+the details currently not well documented. The `config` key data structure
+resembles the API for DataStax OpsCenter Lifecycle Manager (LCM) Configuration
+Profiles. Translating LCM config profile API payloads to this format is
+straightforward. Documentation of this section will be present in future
+releases.
+
+## Superuser credentials
+
+By default, a publicly known superuser gets created. This leaves a window of 
+vulnerability open from the time that the DseDatacenter gets created, 
+up until someone updates the credentials. To instead create a superuser 
+with your own credentials, you can create a secret with kubectl.
+
+### Example superuser secret creation
+
+```
+kubectl create secret generic dse-superuser-secret \
+    --from-literal=username=someuser \
+    --from-literal=password=somepassword
+```
+
+To use this new superuser secret, specify the name of the secret from 
+within the `DseDatacenter` config yaml that you load into the cluster:
+
+```yaml
+apiVersion: datastax.com/v1alpha1
+kind: DseDatacenter
+metadata:
+  name: dtcntr
+spec:
+  dseSuperuserSecret: dse-superuser-secret
+```
+
+## Specifying DSE version and image
+
+With the release of the operator v0.4.0 comes a new way to specify
+which version of DSE and image you want to use. From within the config yaml
+for your `DseDatacenter` resource, you can use the `dseVersion` and `dseImage`
+spec properties.
+
+`dseVersion` is required, and currently the only supported value is `6.8.0`. 
+
+If `dseImage` is not specified, a default compatible image for the provided 
+`dseVersion` will automatically be used. If you want to use a different image, specify the image in the format `<qualified path>:<tag>`.
+
+### Using a default image
+
+```yaml
+apiVersion: datastax.com/v1alpha1
+kind: DseDatacenter
+metadata:
+  name: dtcntr
+spec:
+  dseVersion: 6.8.0
+```
+
+### Using a specific image
+
+```yaml
+apiVersion: datastax.com/v1alpha1
+kind: DseDatacenter
+metadata:
+  name: dtcntr
+spec:
+  dseVersion: 6.8.0
+  dseImage: datastaxlabs/dse-k8s-server:6.8.0-20191113
+```
 
 ## Example Config
 
@@ -180,6 +252,10 @@ metadata:
   name: dc1
 spec:
   dseClusterName: cluster1
+  dseImage: datastaxlabs/dse-k8s-server:6.8.0-20191113
+  dseVersion: 6.8.0
+  managementApiAuth:
+    insecure: {}
   size: 3
   storageclaim:
     storageclassname: dse-storage
@@ -296,8 +372,12 @@ this time.
    release is an early preview of an unfinished product intended to allow proof
    of concept deployments and to facilitate early customer feedback into the
    software development process.
-2. The DSE Kubernetes Operator is compatible only with a specific DSE docker 
-   image co-hosted in the labs Docker Hub repository.
+2. The operator is compatible with DSE 6.8.0 and above. It will not function
+   with prior releases of DSE. Furthermore, version 0.4.0 of the operator is
+   compatible only with a specific DSE docker image co-hosted in the labs
+   [Docker Hub
+   repository](https://cloud.docker.com/u/datastaxlabs/repository/docker/datastaxlabs/dse-k8s-server).
+   Other labs releases of DSE 6.8.0 will not function with the operator.
 3. The operator is compatible with DSE and the Cassandra workload only. It does
    not support DDAC or Advanced Workloads like Analytics, Graph, and Search.
 4. There is no facility for multi-region DSE clusters. The operator functions
@@ -311,3 +391,23 @@ this time.
    to use local volumes.
 6. The operator does not automate the creation of key stores and trust stores
    for client-to-node and internode encryption.
+
+# Changelog
+
+## v0.4.0
+* KO-97  Faster cluster deployments
+* KO-123 Custom CQL super user. Clusters can now be provisioned without the
+  publicly known super user `cassandra` and publicly known default password
+  `cassandra`.
+* KO-42  Preliminary support for DSE upgrades
+* KO-87  Preliminary support for two-way SSL authentication to the DSE
+  management API. At this time, the operator does not automatically create
+  certificates.
+* KO-116 Fix pod disruption budget calculation. It was incorrectly calculated
+  per-rack instead of per-datacenter.
+* KO-129 Provide `allowMultipleNodesPerWorker` parameter to enable testing
+  on small k8s clusters.
+* KO-136 Rework how DSE images and versions are specified.
+
+## v0.3.0
+* Initial labs release.
