@@ -8,8 +8,10 @@ and managing DSE in a Kubernetes cluster.
 
 ## Prerequisites
 
-1. A Kubernetes cluster running version 1.13.0 or higher. The operator may
-   function with older releases, but certification is pending.
+1. A Kubernetes cluster. Kubernetes v1.15.0 is recommended, but Kubernetes
+   v1.13.0 has been tested and works provided the line containing
+   `x-kubernetes-preserve-unknown-fields: true` is deleted from
+   `datastax-operator-manifests.yaml`.
 2. The ability to download images from Docker Hub from within the Kubernetes
    cluster.
 3. At least one Kubernetes worker node per DSE instance.
@@ -181,9 +183,9 @@ releases.
 
 ## Superuser credentials
 
-By default, a publicly known superuser gets created. This leaves a window of 
-vulnerability open from the time that the DseDatacenter gets created, 
-up until someone updates the credentials. To instead create a superuser 
+By default, a publicly known superuser gets created. This leaves a window of
+vulnerability open from the time that the DseDatacenter gets created,
+up until someone updates the credentials. To instead create a superuser
 with your own credentials, you can create a secret with kubectl.
 
 ### Example superuser secret creation
@@ -194,7 +196,7 @@ kubectl create secret generic dse-superuser-secret \
     --from-literal=password=somepassword
 ```
 
-To use this new superuser secret, specify the name of the secret from 
+To use this new superuser secret, specify the name of the secret from
 within the `DseDatacenter` config yaml that you load into the cluster:
 
 ```yaml
@@ -213,9 +215,9 @@ which version of DSE and image you want to use. From within the config yaml
 for your `DseDatacenter` resource, you can use the `dseVersion` and `dseImage`
 spec properties.
 
-`dseVersion` is required, and currently the only supported value is `6.8.0`. 
+`dseVersion` is required, and currently the only supported value is `6.8.0`.
 
-If `dseImage` is not specified, a default compatible image for the provided 
+If `dseImage` is not specified, a default compatible image for the provided
 `dseVersion` will automatically be used. If you want to use a different image, specify the image in the format `<qualified path>:<tag>`.
 
 ### Using a default image
@@ -373,7 +375,7 @@ this time.
    of concept deployments and to facilitate early customer feedback into the
    software development process.
 2. The operator is compatible with DSE 6.8.0 and above. It will not function
-   with prior releases of DSE. Furthermore, version 0.4.0 of the operator is
+   with prior releases of DSE. Furthermore, version 0.4.1 of the operator is
    compatible only with a specific DSE docker image co-hosted in the labs
    [Docker Hub
    repository](https://cloud.docker.com/u/datastaxlabs/repository/docker/datastaxlabs/dse-k8s-server).
@@ -393,6 +395,15 @@ this time.
    for client-to-node and internode encryption.
 
 # Changelog
+
+## v0.4.1
+* KO-190 Fix bug introduced in v0.4.0 that prevented scaling up or deleting
+  datacenters.
+* KO-177 Create a headless service that includes pods that are not ready. While
+  this is not useful for routing CQL traffic, it can be helpful for monitoring
+  infrastructure like Prometheus that would like to attempt to collect metrics
+  from pods even if they are unhealthy, and which can tolerate connection
+  failure.
 
 ## v0.4.0
 * KO-97  Faster cluster deployments

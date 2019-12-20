@@ -278,7 +278,7 @@ spec:
       serviceAccountName: dse-operator
       containers:
         - name: dse-operator
-          image: datastaxlabs/dse-k8s-operator:0.4.0-20191113
+          image: datastaxlabs/dse-k8s-operator:0.4.1-20191220
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
