@@ -6,9 +6,10 @@ DataStax Labs program.
 
 ## Components
 
-### DataStax Graph Labs
 
-Refer to the [dsgraph](dsgraph) directory.
+### DataStax Early Adopter Release
+
+Refer to the [dse-early-adopter-release](dse-early-adopter-release) directory.
 
 ### DataStax Kubernetes Operator
 
@@ -21,6 +22,11 @@ Refer to the [spring-boot-starter](spring-boot-starter) directory.
 ### DataStax Kafka Connector CDC Source
 
 Refer to the [kafka-connector-cdc](kafka-connector-cdc) directory.
+
+### DataStax Graph Labs
+
+This folder is deprecated as we are folding the graph labs code into the DSE Early Adopter Release directory.
+Refer to the [dsgraph](dsgraph) directory.
 
 ## Support
 
