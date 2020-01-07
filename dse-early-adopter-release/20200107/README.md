@@ -1,10 +1,12 @@
 # DataStax Early Adopter Release Labs
 
-These are the instructions for installing and using the DataStax Early Adopter Release using Docker images.
+These are the instructions for using the DataStax Early Adopter Release using Docker images.
 
 For the downloadable tarball version of the DSE EAP preview, refer to
 the [DataStax Labs][1] website and download DataStax EAP preview. Then,
 follow the instructions with the included README.md from the download.
+
+For the Docker version of the DSE EAP preview, refer to the [DataStax Labs][1] and then read the Docker section in this README for installation instructions. 
 
 The use of the software described here is subject to the [DataStax Labs
 Terms][4].
@@ -90,6 +92,86 @@ Here is the list of Guardrails introduced in this release. Please refere to the 
 * partition_keys_in_select_failure_threshold: Failure threshold to prevent IN query containing more partition keys than threshold
 * disk_usage_percentage_warn_threshold: Warning threshold to warn when local disk usage exceeding threshold. Valid values: (1, 100]
 * disk_usage_percentage_failure_threshold: Failure threshold to reject write requests if replica disk usage exceeding threshold. Valid values: (1, 100]
+
+## Using Labs Docker Images
+
+Note: We intentionally do not have a 'latest' tag on the Labs Docker
+images. Instead they are version tagged to ensure you're using the
+intended preview version. See the examples below.
+
+To run the Docker examples you must accept and agree to the [DataStax
+Labs Terms][4]. Setting the `DS_LICENSE` variable as shown below
+indicates your acceptance of those terms.
+
+### DataStax Enterprise
+
+To download and run the DataStax Enterprise Labs Docker image:
+
+    docker run -e DS_LICENSE=accept --name my-dse -d datastaxlabs/datastax-graph:6.8.0.20190912 -s -k -g
+
+This will start DataStax Enterprise Server with Graph, Search and
+Analytics running (the recommended combination).
+
+After several minutes, DSE should be running. You can confirm this with
+a nodetool status command:
+
+    docker exec -it my-dse dsetool status
+
+In the status message you should see confirmation that the single node
+is running and that Graph mode is enabled:
+
+    DC: dc1         Workload: SearchAnalytics Graph: yes    Analytics Master: 172.17.0.2
+    ====================================================================================
+    Status=Up/Down
+    |/ State=Normal/Leaving/Joining/Moving
+    --   Address      Load         Effective-Ownership  Token                  Rack     Health [0,1]
+    UN   172.17.0.2   124.07 KiB   100.00%              -2702044001711757463   rack1    0.20
+
+Refer to [datastax/dse-server][2] for more details about running
+DataStax Enterprise Server in a Docker container.
+
+### DataStax Studio
+
+To download and run the DataStax Studio Labs Docker image:
+
+    docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastaxlabs/datastax-studio:6.8.0.20190912
+
+This will start DataStax Studio and connect it with the running
+DataStax Enterprise Server Docker container.
+
+Once Studio has started it should be viewable in a browser at: <http://DOCKER_HOST_IP:9091>
+
+Refer to [datastax/dse-studio][3] for more details about running
+DataStax Studio in a Docker container.
+
+### Docker Compose Example
+
+Use the Docker Compose example file `docker-compose.yml` provided in
+this repo to automate provisioning of a single DSE Graph node with a
+single Studio node.
+
+To use Docker Compose you must first signal your acceptance of the
+[DataStax Labs Terms][4] by uncommenting the `DS_LICENSE` environment
+variable setting under both `dse` and `studio` sections:
+
+    dse:
+      image: ...
+      environment:
+        - DS_LICENSE=accept
+
+
+    studio:
+      image: ...
+      environment:
+        - DS_LICENSE=accept
+
+The combined environment can be brought up or torn down with Docker Compose commands:
+
+    docker-compose up -d
+    docker-compose down
+
+Then follow the example steps listed above for working with DataStax
+Enterprise and DataStax Studio.
 
 ## Next Steps
 
