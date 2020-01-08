@@ -49,15 +49,15 @@ This item introduces the following new cassandra.yaml properties. Please refer t
 * zerocopy_max_unused_metadata_in_mb -- Determines how many megabytes *per sstable* of excess metadata are allowed in order to actually use zero-copy rather than legacy streaming
 * stream_outbound_buffer_in_kb -- Buffer size for stream writes: each outbound streaming session will buffer writes according to such size.
 * stream_max_outbound_buffers_in_kb -- Max amount of pending data to be written before pausing outbound streaming: this value is shared among all outbound streaming session, in order to cap the overall memory used by all streaming processes (bootstrap, repair etc).
-​
+
 ### Incremental Nodesync
 NodeSync has a new incremental mode, which can be enabled on a per-table basis with:
        ALTER TABLE t WITH nodesync = { 'enabled': 'true', 'incremental': 'true'}
-​
+
 When enabled, new validations will not re-validate previously validated data, drastically lowering the work done by NodeSync (and thus its impact on the cluster). One (current) downside however is that if a node loses an sstable (for instance an sstable gets corrupted and either needs to be entirely deleted, or scrub is not able to recover all of its data), then a manual user validation needs to be triggered to ensure the lost data is recovered.
-​
+
 This item will be enabled by default when the next version of DSE is GA. DataStax recommends using Incremental Nodesync over Nodesync.
-​
+
 ### Guardrails
 With this release of DSE, DataStax is introducing a new concept to help users avoid making mistakes and implementing known anti-patterns in Cassandra.  We call these items Guardrails. With this release of DSE, the Guardrails are not enabled by default unless otherwise noted. They are optional. Based on the experiences and feedback from DSE users, DataStax may enable more of these items by default in future releases.
 ​
@@ -86,50 +86,49 @@ Here is the list of Guardrails introduced in this release. Please refer to the c
 * partition_keys_in_select_failure_threshold: Failure threshold to prevent IN query containing more partition keys than threshold
 * disk_usage_percentage_warn_threshold: Warning threshold to warn when local disk usage exceeding threshold. Valid values: (1, 100]
 * disk_usage_percentage_failure_threshold: Failure threshold to reject write requests if replica disk usage exceeding threshold. Valid values: (1, 100]
-​
+
 ## Using Labs Docker Images
-​
+
 Note: We intentionally do not have a 'latest' tag on the Labs Docker
 images. Instead they are version tagged to ensure you're using the
 intended preview version. See the examples below.
-​
+
 To run the Docker examples you must accept and agree to the [DataStax
 Labs Terms][4]. Setting the `DS_LICENSE` variable as shown below
 indicates your acceptance of those terms.
-​
+
 ### DataStax Enterprise
-​
 To download and run the DataStax Enterprise Labs Docker image:
-​
+
     docker run -e DS_LICENSE=accept --name my-dse -d datastaxlabs/datastax-enterprise:6.8.0.<updateonrelease> -s -k -g
-​
+
 This will start DataStax Enterprise Server with Graph, Search and
 Analytics running (the recommended combination).
-​
+
 After several minutes, DSE should be running. You can confirm this with
 a nodetool status command:
-​
+
     docker exec -it my-dse dsetool status
-​
+
 In the status message you should see confirmation that the single node
 is running and that Graph mode is enabled:
-​
+
     DC: dc1         Workload: SearchAnalytics Graph: yes    Analytics Master: 172.17.0.2
     ====================================================================================
     Status=Up/Down
     |/ State=Normal/Leaving/Joining/Moving
     --   Address      Load         Effective-Ownership  Token                  Rack     Health [0,1]
     UN   172.17.0.2   124.07 KiB   100.00%              -2702044001711757463   rack1    0.20
-​
+
 Refer to [datastax/dse-server][2] for more details about running
 DataStax Enterprise Server in a Docker container.
-​
+
 ### DataStax Studio
-​
+
 To download and run the DataStax Studio Labs Docker image:
-​
+
     docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastaxlabs/datastax-studio:6.8.0.<updateonrelease>
-​
+
 This will start DataStax Studio and connect it with the running
 DataStax Enterprise Server Docker container.
 
