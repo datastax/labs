@@ -84,8 +84,8 @@ Here is the list of Guardrails introduced in this release. Please refer to the c
 * page_size_failure_threshold_in_kb: Failure threshold to prevent providing larger paging by bytes than threshold, also served as a hard paging limit
 * in_select_cartesian_product_failure_threshold: Failure threshold to prevent IN query creating size of cartesian product exceeding threshold, eg. "a in (1,2,...10) and b in (1,2...10)" results in cartesian product of 100.
 * partition_keys_in_select_failure_threshold: Failure threshold to prevent IN query containing more partition keys than threshold
-* disk_usage_percentage_warn_threshold: Warning threshold to warn when local disk usage exceeding threshold. Valid values: (1, 100]
-* disk_usage_percentage_failure_threshold: Failure threshold to reject write requests if replica disk usage exceeding threshold. Valid values: (1, 100]
+* disk_usage_percentage_warn_threshold: Warning threshold to warn when local disk usage exceeding threshold. Valid values: (1, 100)
+* disk_usage_percentage_failure_threshold: Failure threshold to reject write requests if replica disk usage exceeding threshold. Valid values: (1, 100)
 
 ## Using Labs Docker Images
 
