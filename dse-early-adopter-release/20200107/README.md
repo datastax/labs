@@ -1,18 +1,18 @@
 # DataStax Early Adopter Release Labs
-​
+
 These are the instructions for using the DataStax Early Adopter Release using Docker images.
-​
+
 For the downloadable tarball version of the DSE EAP preview, refer to
 the [DataStax Labs][1] website and download DataStax EAP preview. Then,
 follow the instructions with the included README.md from the download.
-​
+
 For the Docker version of the DSE EAP preview, refer to the [DataStax Labs][1] and then read the Docker section in this README for installation instructions. 
-​
+
 The use of the software described here is subject to the [DataStax Labs
 Terms][4].
-​
+
 ## What's New and Documentation
-​
+
 The EAP release included in this Labs package includes the following
 new features and enhancements:
 - DataStax Graph Core Engine - New Graph for Cassandra engine
@@ -32,18 +32,17 @@ new features and enhancements:
 - DSP-15762 - Improve Spark Job Performance (by up to 60%) by Reducing Tombstones 
 - DSP-17431 - Remove Legacy Solr Join Syntax for Non Partition Key JOINS 
 - DB-2509 - Chunk cache heap overhead is too high 
-​
-​
+
 ### Graph Documentation
 Please review the [graph/graph-docs](./graph/graph-docs/) directory for an
 overview of the features, behaviors, and functionality of the
 experimental and new graph engine.
-​
+
 ### Zero Copy Streaming
 Zero Copy Streaming improves the performance of Streaming operations up to 4X. This is done by changing the streaming process to avoid any serialization during streaming such that the entire streaming process becomes a network copy.  Zero Copy Streaming is enabled by default. 
-​
+
 Zero Copy Streaming functions by streaming the required ranges of an sstables to separate data files, while the sstable metadata is streamed in its entirety and linked to every data file produced on the destination node.  This avoids the costly overhead of rebuilding the metadata at the expense of additional disk usage (see zerocopy_max_unused_metadata_in_mb). All sstables and their components are copied via zero-copy operations, greatly reducing GC pressure and improving overall speed.
-​
+
 This item introduces the following new cassandra.yaml properties. Please refer to the cassandra.yaml file for more details on each property:
 * zerocopy_streaming_enabled -- Enabled by default
 * zerocopy_max_sstables -- Determines the max number of sstables a *single* sstable can be split into to actually use zero-copy rather than legacy streaming.
@@ -133,49 +132,49 @@ To download and run the DataStax Studio Labs Docker image:
 ​
 This will start DataStax Studio and connect it with the running
 DataStax Enterprise Server Docker container.
-​
+
 Once Studio has started it should be viewable in a browser at: <http://DOCKER_HOST_IP:9091>
-​
+
 Refer to [datastax/dse-studio][3] for more details about running
 DataStax Studio in a Docker container.
-​
+
 ### Docker Compose Example
-​
+
 Use the Docker Compose example file `docker-compose.yml` provided in
 this repo to automate provisioning of a single DSE Graph node with a
 single Studio node.
-​
+
 To use Docker Compose you must first signal your acceptance of the
 [DataStax Labs Terms][4] by uncommenting the `DS_LICENSE` environment
 variable setting under both `dse` and `studio` sections:
-​
+
     dse:
       image: ...
       environment:
         - DS_LICENSE=accept
-​
-​
+
+
     studio:
       image: ...
       environment:
         - DS_LICENSE=accept
-​
+
 The combined environment can be brought up or torn down with Docker Compose commands:
-​
+
     docker-compose up -d
     docker-compose down
-​
+
 Then follow the example steps listed above for working with DataStax
 Enterprise and DataStax Studio.
-​
+
 ## Next Steps
-​
+
 We want to hear your feedback! Go to the Labs section of the new
 DataStax Community forums:
 <https://community.datastax.com/spaces/11/index.html>
-​
+
 You can also reach out on the Labs forums for any help needed.
-​
+
 [1]: https://downloads.datastax.com/#labs
 [2]: https://hub.docker.com/r/datastax/dse-server
 [3]: https://hub.docker.com/r/datastax/dse-studio
