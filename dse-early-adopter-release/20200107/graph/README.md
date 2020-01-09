@@ -1,15 +1,3 @@
-# DataStax Graph Labs
-
-These are the instructions for installing and using the DataStax Graph
-Labs preview using Docker images.
-
-For the downloadable tarball version of the Graph preview, refer to
-the [DataStax Labs][1] website and download DataStax Graph (DSG). Then
-follow the instructions with the included README.md from the download.
-
-The use of the software described here is subject to the [DataStax Labs
-Terms][4].
-
 ## What's New and Documentation
 
 The new, experimental graph engine included in this Labs package
@@ -53,6 +41,8 @@ In addition to the documentation included here, DataStax is providing
 a set of Getting Started Studio Notebooks to help users understand the
 key concepts of the experimental graph engine build sample
 applications quickly.
+
+To use these notebooks, please look in the [studio-getting-started-guide-notebooks](./studio-getting-started-guide-notebooks/) directory and simply import each notebook using this instructions found on the [Datastax Documentation Studio page] (https://docs.datastax.com/en/studio/6.7/studio/importNotebook.html) 
 
 Three different Getting Started notebooks are provided in this
 package:
@@ -126,6 +116,8 @@ This will start DataStax Studio and connect it with the running
 DataStax Enterprise Server Docker container.
 
 Once Studio has started it should be viewable in a browser at: <http://DOCKER_HOST_IP:9091>
+
+Update the default connection or create a new connection using my-dse as the hostname, see DataStax Studio User Guide > Creating a new connection for further instructions.
 
 Refer to [datastax/dse-studio][3] for more details about running
 DataStax Studio in a Docker container.
