@@ -100,7 +100,7 @@ indicates your acceptance of those terms.
 ### DataStax Enterprise
 To download and run the DataStax Enterprise Labs Docker image:
 
-    docker run -e DS_LICENSE=accept --name my-dse -d datastaxlabs/datastax-enterprise:6.8.0.<updateonrelease> -s -k -g
+    docker run -e DS_LICENSE=accept --name my-dse -d datastaxlabs/dse-server-early-adopter-release:6.8.0.20200107 -s -k -g
 
 This will start DataStax Enterprise Server with Graph, Search and
 Analytics running (the recommended combination).
@@ -127,7 +127,7 @@ DataStax Enterprise Server in a Docker container.
 
 To download and run the DataStax Studio Labs Docker image:
 
-    docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastaxlabs/datastax-studio:6.8.0.<updateonrelease>
+    docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastaxlabs/dse-studio-early-adopter-release:6.8.0.20191202
 
 This will start DataStax Studio and connect it with the running
 DataStax Enterprise Server Docker container.
