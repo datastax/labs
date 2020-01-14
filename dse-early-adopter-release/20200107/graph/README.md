@@ -74,7 +74,7 @@ Please review the contents under [graph-migration](./graph-migration/).
 To write your own applications which work with the DataStax Graph Labs
 preview, you'll need special Labs versions of the Java and Python
 drivers. Visit the [DataStax Labs][1] website and download DataStax
-Graph (DSG). Then expand the zip file and refer to the `python-driver`
+Early Adopter Release. Then expand the zip file and refer to the `python-driver`
 and `java-driver` directories for further instructions.
 
 ## Next Steps
