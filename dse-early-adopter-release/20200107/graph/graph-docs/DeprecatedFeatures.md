@@ -1,13 +1,13 @@
-# What are the deprecated Features from Classic compared to Native Engine?
+# What are the deprecated Features from Classic compared to Core Engine?
 
 ## Graph configuration
 
 Configuration options such as `allow_scan` / `schema_mode` / `evaluation_timeout` were completely removed. 
-The only traversal configuration that Native Engine supports are documented [here](TraversalOptions.md).
+The only traversal configuration that Core Engine supports are documented [here](TraversalOptions.md).
 
 
 ## dse.yaml settings
-Classic Engine still supports **all** settings from `dse.yaml`. However, for Native Engine the only supported options are:
+Classic Engine still supports **all** settings from `dse.yaml`. However, for Core Engine the only supported options are:
 
   * `analytic_evaluation_timeout_in_ms`: Maximum time to wait for an OLAP analytic (Spark) traversal to evaluate
   * `realtime_evaluation_timeout_in_ms`: Maximum time to wait for an OLTP real-time traversal to evaluate
@@ -30,7 +30,7 @@ Transactions are not supported in C* or DataStax Graph so we should generally mo
 Multi and meta-property support has been dropped. Use cases have previously included:
 
   * Access control: C* RLAC and RBAC are used to fulfill this use case. Unlike meta-properties, this solution will scale because CQL requests are pre-processed to check what data a user may see rather than fetching all data and filtering.
-  * Collections: Native Engine graphs support CQL collection types and may be queried via the new collection predicates: `contains`, `containsKey`, `containsValue`, `entryEq`.
+  * Collections: Core Engine graphs support CQL collection types and may be queried via the new collection predicates: `contains`, `containsKey`, `containsValue`, `entryEq`.
   * Time machine: This requires large amounts of filtering to achieve and does not scale outside of a small graphs. It also has the possibility of creating very large partitions. Users must explicitly create a model that takes timestamps into account.
   * Entity resolution: Use regular vertices and edges to model these relationships. Use a separate vertex for contributing datasource, and use edges to link them to a resolved entity.
 
@@ -69,16 +69,16 @@ Data types have been aligned with the java driver. All types that were supported
 
 In Classic Engine graphs `Duration` is represented by `java.time.Duration`.
 
-In Native Engine graphs `Duration` is represented by `com.datastax.driver.core.Duration`.
+In Core Engine graphs `Duration` is represented by `com.datastax.driver.core.Duration`.
 
 ## Query caching
-In Classic there was the the option to set graph and vertex queries to be cached. This is no longer an option in Native Engine graphs. We may add caching ability in a subsequent release.
+In Classic there was the the option to set graph and vertex queries to be cached. This is no longer an option in Core Engine graphs. We may add caching ability in a subsequent release.
 
 ## TTL support
-TTL support via schema currently requires users set this via CQL in Native Engine graphs. This is a feature that will be added in a subsequent release.
+TTL support via schema currently requires users set this via CQL in Core Engine graphs. This is a feature that will be added in a subsequent release.
 
 ## External ID construction
-Native Engine does not support external ID construction and IDs must be obtained directly from elements if they are to be used for lookups.
+Core Engine does not support external ID construction and IDs must be obtained directly from elements if they are to be used for lookups.
 
 ```g.V(id)```
 
@@ -91,10 +91,10 @@ Get `bob` and `alice`: `g.V().has('name', within(['bob', 'alice']))`
 
 ## DGL
 
-DGL is deprecated and not supported by Native Engine. Users can instead use plain CQL for data ingestion or one of the bulk loading tools (GraphFrames, DS Bulk Loader).
+DGL is deprecated and not supported by Core Engine. Users can instead use plain CQL for data ingestion or one of the bulk loading tools (GraphFrames, DS Bulk Loader).
 
 
 ## Lambdas
 
-Lambdas are currently not supported in Native Engine, but they may be enabled by default in a subsequent release.
+Lambdas are currently not supported in Core Engine, but they may be enabled by default in a subsequent release.
 

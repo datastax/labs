@@ -33,7 +33,7 @@ schema.edgeLabel('created').connection('person', 'software').create()
 :exit
 ```
 
-Create the Native Engine schema:
+Create the Core Engine schema:
 ```
 dse graph-migrate-schema -gremlin classic migrated
 ```
@@ -152,7 +152,7 @@ g.addV('person').
     property('name', 'bob').
     property('since', '2001-01-01T00:00:00Z' as Instant)
 ``` 
-Native Engine allows graph indexes for edges:
+Core Engine allows graph indexes for edges:
 ```
 schema.edgeLabel('has_name').
     from('person').
@@ -169,11 +169,11 @@ Which allows direct lookup of edges:
 g.E().hasLabel('has_name').has('name', 'bob').inV()
 ```  
 
-# Edge traversal in a Native Engine Graph
-In Native Engine graphs the edge layout can be completely customized. This allows users to avoid indexes in many cases, an important 
+# Edge traversal in a Core Engine Graph
+In Core Engine graphs the edge layout can be completely customized. This allows users to avoid indexes in many cases, an important 
 consideration for scalable graphs.
 
-## Native Engine Graphs use only one row per edge by default
+## Core Engine Graphs use only one row per edge by default
 Classic Engine allowed edge navigation in both directions by default by inserting two records per edge.
 However, this did not come for free. In particular `in()` edges had the potential to cause large partitions. For instance:
 ```
@@ -185,7 +185,7 @@ cluster to become imbalanced due to the large numbers of edges in the same parti
 It's also worth noting that typically OLTP traversals cannot realistically process every person in a country, and OLAP
 traversals do not need the reverse record anyway.
 
-For these reasons Native Engine graphs are more conservative in edge record creation, creating only one record for each edge and
+For these reasons Core Engine graphs are more conservative in edge record creation, creating only one record for each edge and
 thus speeding up ingestion. This also allows external tools such as DSBulk to be used to insert data.
 
 ### Indexing edges to allow navigation in different directions.
@@ -205,7 +205,7 @@ But trying to traverse in the opposite direction will throw an error.
 ```
 g.V(software).in() //ERROR 
 ```
-Native Engine will tell you what index you need to create to allow this traversal in the error message. 
+Core Engine will tell you what index you need to create to allow this traversal in the error message. 
 Cut and paste the index schema statement to execute and create the index:
 ```
 One or more indexes are required to execute the traversal: g.V().hasLabel("software").has("name","studio").in()

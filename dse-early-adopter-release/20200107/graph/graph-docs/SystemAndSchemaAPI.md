@@ -1,12 +1,12 @@
 # DataStax Graph - System API Usage Examples
 
-## Native Engine
+## Core Engine
 
-#### Creating a Native Engine Graph
+#### Creating a Core Engine Graph
 
-Native Engine graphs are created with `SimpleStrategy` by default:
+Core Engine graphs are created with `SimpleStrategy` by default:
 ```
-system.graph("test_native").
+system.graph("test_core").
     ifNotExists().
     create()
 ```
@@ -14,16 +14,16 @@ system.graph("test_native").
 Or you can use `NetworkTopologyStrategy` by setting the replication explicitly.
 Make sure that the `DC_NAME` matches your DC name as listed by `nodetool status`.
 ```
-system.graph("test_native").
+system.graph("test_core").
     ifNotExists().
     withReplication("{'class': 'NetworkTopologyStrategy', '<DC_NAME>': <REPLICATION_FACTOR>}").
     create()
 ```
 
-Native Engine graphs are created with `durableWrites` set to `true` by default.
+Core Engine graphs are created with `durableWrites` set to `true` by default.
 If necessary, user can specify the setting when creating the graph:
 ```
-system.graph("test_native").
+system.graph("test_Core").
     ifNotExists().
     withReplication("{'class': 'NetworkTopologyStrategy', '<DC_NAME>': <REPLICATION_FACTOR>}").
     andDurableWrites(false).
@@ -31,23 +31,23 @@ system.graph("test_native").
 ```
 However, it is **NOT recommended** to set `durableWrites` to `false`.
 
-#### Convert an existing non-graph keyspace to a Native Engine Graph
+#### Convert an existing non-graph keyspace to a Core Engine Graph
 ```
 system.graph("testExisting").
     fromExistingKeyspace().
     create()
 ```
 
-#### Dropping/Truncating a Native Engine Graph
+#### Dropping/Truncating a Core Engine Graph
 `drop()` will drop the underlying keyspace and the tables, whereas `truncate()` will only delete their contents.
 ```
-system.graph("test_native").
+system.graph("test_core").
     ifExists().
     drop()
 ```
 
 ```
-system.graph("test_native").
+system.graph("test_core").
     ifExists().
     truncate()
 ```
@@ -77,7 +77,7 @@ system.graph('testClassic').
 
 ```
 gremlin> system.graphs()
-==>test_native
+==>test_core
 ==>testClassic
 ```
 
@@ -85,24 +85,24 @@ gremlin> system.graphs()
 
 ```
 gremlin> system.list()
-==>Name: test_native | Engine: Native | Replication: {SearchGraph=1, class=org.apache.cassandra.locator.NetworkTopologyStrategy}
+==>Name: test_core | Engine: Core | Replication: {SearchGraph=1, class=org.apache.cassandra.locator.NetworkTopologyStrategy}
 ==>Name: testClassic | Engine: Classic | Replication: {SearchGraph=1, class=org.apache.cassandra.locator.NetworkTopologyStrategy}
 ```
 
 #### Schema definition of a particular Graph
 
 ```
-gremlin> system.graph("test_native").describe()
-==>system.graph('test_native').ifNotExists().withReplication("{'class': 'org.apache.cassandra.locator.NetworkTopologyStrategy', 'SearchGraph': '1'}").andDurableWrites(true).nativeEngine().create()
+gremlin> system.graph("test_core").describe()
+==>system.graph('test_core').ifNotExists().withReplication("{'class': 'org.apache.cassandra.locator.NetworkTopologyStrategy', 'SearchGraph': '1'}").andDurableWrites(true).coreEngine().create()
 ```
 
 
 
-# Native Engine Graph - Schema API Usage Examples
-All examples are for `Native` graphs.
+# Core Engine Graph - Schema API Usage Examples
+All examples are for `Core` graphs.
 Remember that once you have created your graph you will need to alias it in the console:
 ```
-:remote config alias g test_native.g
+:remote config alias g test_core.g
 ```
 
 ## Creating a Vertex/Edge Label 
@@ -146,7 +146,7 @@ schema.vertexLabel('personCustom').
 #### Creating a Vertex Label from an existing Table
 Assuming we have the following existing non-vertex/edge table:
 ```
-CREATE TABLE test_native.book_table (title varchar, isbn int, pages int, 
+CREATE TABLE test_core.book_table (title varchar, isbn int, pages int, 
 PRIMARY KEY ((title), isbn)) 
 WITH CLUSTERING ORDER BY (isbn ASC);
 ```
@@ -170,7 +170,7 @@ schema.edgeLabel('created').
 
 Eventually you will end up with the following CQL Schema:
 ```
-CREATE TABLE test_native.person__created__software (
+CREATE TABLE test_core.person__created__software (
     person_name text,
     person_ssn text,
     person_age int,
@@ -256,7 +256,7 @@ schema.edgeLabel('created').
 
 Which will lead to the below CQL Schema:
 ```
-CREATE TABLE test_native.person__created__software (
+CREATE TABLE test_core.person__created__software (
     person_name text,
     person_age int,
     creation_date text,

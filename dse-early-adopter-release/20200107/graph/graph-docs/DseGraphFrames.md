@@ -613,7 +613,7 @@ for accomplishing exactly this.
 Multi and meta-properties are modeled differently in Classic DataStax Graph compared to the new DataStax Graph. In the new 
 DataStax Graph, multi and meta-properties have been removed, and it is recommended to model them with collections/UDTs or
 distinct elements. We will cover some of these details here. For broader guidance on migrating from Classic to the new
-DataStax Graph see the [ClassicToNativeGraphMigration](ClassicToNativeGraphMigration.md) write-up.
+DataStax Graph see the [ClassicToCoreGraphMigration](ClassicToCoreGraphMigration.md) write-up.
 
 ###### How to manage multi/meta-properties for Classic DataStax Graph
 Here is an example of updating vertex multi and meta-properties. Suppose we start with the schema shown directly below. 
@@ -770,7 +770,7 @@ gremlin> g.V().has("name", "jupiter").properties().valueMap(true)
 
 With the new DataStax Graph engine, a user has two options for handling multi and meta-properties: use CQL collection 
 types or drop them altogether. Details on data modeling changes between the Classic DataStax Graph and the new DataStax Graph 
-Engine can be found in our [ClassicToNativeGraphMigration](ClassicToNativeGraphMigration.md) write-up. Here is an example 
+Engine can be found in our [ClassicToCoreGraphMigration](ClassicToCoreGraphMigration.md) write-up. Here is an example 
 of updating vertex labels with complex types which includes User Defined Types (UDTs), collections, and nested collections.
 
 Here is how we can define the new DataStax Graph data model using complex types.

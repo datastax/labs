@@ -4,10 +4,10 @@ CQL extensions have been added to allow creation and maintenance of graph keyspa
 ## How to specify that a Keyspace should be a Graph?
 In order to treat a keyspace as a graph, one needs to specify **graph_engine** when creating/altering a keyspace:
 ```
-ALTER KEYSPACE test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1} AND graph_engine = 'Native';
+ALTER KEYSPACE test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1} AND graph_engine = 'Core';
 ```
 ## Which Graph Engines are available?
-The only engine type is **Native**. There's also **Classic** engine, but this can't be specified on a keyspace, because a **Classic** graph consists of multiple keyspaces and needs to be created via the traditional System API.
+The only engine type is **Core**. There's also **Classic** engine, but this can't be specified on a keyspace, because a **Classic** graph consists of multiple keyspaces and needs to be created via the traditional System API.
 
 `system_schema.keyspaces` will also properly reflect the graph engine:
 
@@ -16,7 +16,7 @@ cqlsh> select * from system_schema.keyspaces;
 
  keyspace_name      | durable_writes | graph_engine | replication
 --------------------+----------------+--------------+-------------------------------------------------------------------------------------
-               test |           True |       Native | {'class': 'org.apache.cassandra.locator.SimpleStrategy', 'replication_factor': '1'}
+               test |           True |       Core | {'class': 'org.apache.cassandra.locator.SimpleStrategy', 'replication_factor': '1'}
         system_auth |           True |         null | {'class': 'org.apache.cassandra.locator.SimpleStrategy', 'replication_factor': '1'}
  ...
              system |           True |         null |                             {'class': 'org.apache.cassandra.locator.LocalStrategy'}
@@ -30,7 +30,7 @@ It is important to note that if a keyspace does not have **graph_engine** set, i
 
 ## What's the difference between the Graph engines?
 
-**Native** requires a keyspace and tables to specify how the Graph schema looks like. **Native** will keep all data of the graph in those tables.
+**Core** requires a keyspace and tables to specify how the Graph schema looks like. **Core** will keep all data of the graph in those tables.
 
 ---
 

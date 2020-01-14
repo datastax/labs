@@ -1,6 +1,6 @@
 # Index Analyzer
 
-Native Engine graphs benefits from automatic index analysis either explicitly via the schema API or via error messages.
+Core Engine graphs benefits from automatic index analysis either explicitly via the schema API or via error messages.
  
 The index analyzer has the ability to figure out what indexes a given traversal requires. It will propose those necessary indexes and the user has the option to either create those indexes manually (through copy/paste) or automatically (through `.apply()`).
 

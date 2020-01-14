@@ -1,4 +1,4 @@
-# Getting started with Native Engine Graph
+# Getting started with Core Engine Graph
 
 ## Setup
 Create a graph.

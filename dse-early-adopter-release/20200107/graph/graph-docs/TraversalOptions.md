@@ -1,6 +1,6 @@
 # DataStax Graph - Traversal Configurations
 
-## Native Engine Graph
+## Core Engine Graph
 
 #### Changing the limits on allowed mutations
 

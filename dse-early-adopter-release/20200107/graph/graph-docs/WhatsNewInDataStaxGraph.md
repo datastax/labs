@@ -126,7 +126,7 @@ Additionally, bulk loading graph data can be performed through CQL without havin
 
 DataStax Graph comes with new CQL grammar that allows keyspaces to be treated as graphs and tables to be treated as vertex/edge labels in that graph. This is especially helpful for users that would like to convert their existing data to a graph.
 
-Executing `ALTER KEYSPACE ks WITH <replicationSettings> AND graph_engine = 'Native'` on an existing keyspace will treat that keyspace as a graph in DSE.
+Executing `ALTER KEYSPACE ks WITH <replicationSettings> AND graph_engine = 'Core'` on an existing keyspace will treat that keyspace as a graph in DSE.
 
 By executing `ALTER TABLE ks.tbl WITH VERTEX LABEL <optionalName>` or `ALTER TABLE ks.tbl WITH EDGE LABEL <optionalName> FROM vLabelOne(...) TO vLabelTwo(...)` a CQL table can be represented as a vertex/edge label.
 
