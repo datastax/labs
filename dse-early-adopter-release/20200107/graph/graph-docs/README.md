@@ -54,3 +54,5 @@ Existing graph behaviour has been retained by splitting in to two engines: `Clas
 
 [Nested Access on UDT/Tuple Elements](NestedAccessOnUdtAndTupleElements.md)
 
+[ID Format in DataStax Graph](IdFormat.md)
+
