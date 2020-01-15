@@ -37,7 +37,7 @@ Multi and meta-property support has been dropped. Use cases have previously incl
 
 ## Graph API / graph.addVertex / graph.addEdge
 
-The [graph API](https://docs.datastax.com/en/dse/6.0/dse-dev/datastax_enterprise/graph/reference/refGraphAPI.html) was removed.
+The [graph API](https://docs.datastax.com/en/dse/6.8/dse-dev/datastax_enterprise/graph/reference/refGraphAPI.html) was removed.
 
 This means that `graph.addVertex(label, 'label_name', 'key', 'value', 'key', 'value')` / `vertex1.addEdge('edgeLabel', vertex2, [T.id, 'edge_id'], ['key', 'value'] [,...])` are not supported.
 

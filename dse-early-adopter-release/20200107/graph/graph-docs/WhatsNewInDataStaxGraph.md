@@ -23,7 +23,7 @@ The output will look as shown below and will contain information such as:
 ```
 gremlin> g.V().hasLabel("a").has("age", 23)
 One or more indexes are required to execute the traversal: g.V().hasLabel("a").has("age",(int) 23)
-Failed step: DseGraphStep(__.V().hasLabel("a").has("age",(int) 23))
+Failed step: __.V().hasLabel("a").has("age",(int) 23)
 CQL execution: No table or view could satisfy the query 'SELECT * FROM bla.a WHERE age = ?'
 The output of 'schema.indexFor(<your_traversal>).analyze()' suggests the following indexes could be created to allow execution:
 
@@ -144,7 +144,7 @@ The output of `g.V().has("id", 1).profile()` might look as shown below:
 ```
 Step                                                               Count  Traversers       Time (ms)    % Dur
 =============================================================================================================
-DseGraphStep(__.V().has("id",(int) 1))                                 3           3          20.200    70.69
+__.V().has("id",(int) 1)                                               3           3          20.200    70.69
   CQL statements ordered by overall duration                                                  35.418
     \_1=SELECT * FROM sample.company WHERE id = ? / Duration: 11 ms / Count: 1
     \_2=SELECT * FROM sample.person WHERE id = ? / Duration: 11 ms / Count: 1
@@ -158,11 +158,11 @@ Appending `.out("works_with")` to the previous traversal in order to get `g.V().
 ```
 Step                                                               Count  Traversers       Time (ms)    % Dur
 =============================================================================================================
-DseGraphStep(__.V().hasLabel("person").has("id"...                     1           1           1.860    11.28
+__.V().hasLabel("person".has("id"...                                   1           1           1.860    11.28
   CQL statements ordered by overall duration                                                   0.955
     \_1=SELECT * FROM sample.person WHERE id = ? / Duration: < 1 ms / Count: 1
 HasStep([~label.eq(person), id.eq(1)])                                 1           1           0.849     5.15
-DseVertexStep(__.out().hasLabel("works_with"))                         1           1          12.637    76.64
+__.out().hasLabel("works_with")                                        1           1          12.637    76.64
   CQL statements ordered by overall duration                                                   3.993
     \_1=SELECT * FROM sample.person__works_with__software WHERE person_id = ?
         AND person_age = ? / Duration: 2 ms / Count: 1
@@ -252,3 +252,17 @@ schema.edgeLabel('created').
 
 g.V().outE().has('weight', neq(0.8))
 ``` 
+
+## Development traversal source
+
+DataStax Graph now supports the `dev` traversal source when connecting via Studio or Gremlin Console.
+The `dev` traversal source allows queries to be performed without indexing at the cost of performing full scans.
+
+In a typical development workflow for OLTP you should:
+1. Create vertex and edge labels.
+2. Insert some toy data.
+3. Experiment using the `dev` traversal source against your toy graph.
+4. Use `schema.indexFor(<your traversal>).apply()`. It will create any missing indexes that you need. You will now be able to execute your traversal against `g` without error.
+5. Run `schema.describe()` to get your final schema script with indexes.
+
+Trying to use the `dev` traversal source outside of Studio or Gremlin Console will throw an exception.

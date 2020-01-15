@@ -58,10 +58,13 @@ g.addV('software').
 It is generally good practice to add `.iterate()` if you do not need the results to be returned to you. This saves the
 overhead of sending the results back to the client and improves performance.
  
-## Query your graph
+## Develop your queries
+It is advised that while you are experimenting that you use the `dev` traversal source. This will allow you to query 
+without indexing. Note that `dev` is only available from `Gremlin Console` or `Studio`.
+
 Query for `bob`.
 ```
-g.V().hasLabel('person').has('name', 'bob')
+dev.V().hasLabel('person').has('name', 'bob')
 ```
 ```
 ==>v[person:bob#64]
@@ -69,27 +72,39 @@ g.V().hasLabel('person').has('name', 'bob')
 
 Query for software that `bob` created.
 ```
-g.V().hasLabel('person').has('name', 'bob').out('created')
+dev.V().hasLabel('person').has('name', 'bob').out('created')
 ```
 ```
 ==>v[software:studio#37]
 ```
 Query for software `studio`.
 ```
-g.V().hasLabel('software').has('name', 'studio')
+dev.V().hasLabel('software').has('name', 'studio')
 ```
 ```
 ==>v[software:studio#37]
 ```
+Query for creator of `studio`.
+```
+dev.V().hasLabel('software').has('name', 'studio').in()
+```
+```
+==>v[person:bob#64]
+```
 
-## Perform a query that requires the existence of an index
+## Get ready for production
+Once you are happy with your queries you need to switch to the regular `g` traversal source.
+When using `g` filtering can be explicitly enabled, but it is recommended that you index your data for optimal performance.    
+
+For example:
+
 Query for creator of `studio`. This will throw an error as traversal from `software` to `person` will require an index  
 ```
 g.V().hasLabel('software').has('name', 'studio').in()
 ```
 ```
 One or more indexes are required to execute the traversal: g.V().hasLabel("software").has("name","studio").in()
-Failed step: DseVertexStep(__.in())
+Failed step: __.in()
 CQL execution: No table or view could satisfy the query 'SELECT * FROM crew.person__created__software WHERE software_name = ?'
 The output of 'schema.indexFor(<your_traversal>).analyze()' suggests the following indexes could be created to allow execution:
 
@@ -99,10 +114,15 @@ Alternatively consider using:
 g.with('ignore-unindexed') to ignore unindexed traversal. Your results may be incomplete.
 g.with('allow-filtering') to allow filtering. This may have performance implications.
 ```
-Create the required index as specified in the error message.
+Run your queries through `indexFor`
 ```
+schema.indexFor(g.V().hasLabel('software').has('name', 'studio').in()).apply()
+```
+```
+==>Creating the following indexes:
 schema.edgeLabel('created').from('person').to('software').materializedView('person__created__software_by_software_name').ifNotExists().partitionBy(IN, 'name').clusterBy(OUT, 'name', Asc).create()
 ```
+
 Run the query again.
 ```
 g.V().hasLabel('software').has('name', 'studio').in()
@@ -110,3 +130,17 @@ g.V().hasLabel('software').has('name', 'studio').in()
 ```
 ==>v[person:bob#64]
 ```
+
+## Generate your final schema
+Once you have verified that all your queries work against `g` you can generate your final schema by using:
+```
+schema.describe()
+``` 
+```
+==>schema.vertexLabel('person').ifNotExists().partitionBy('name', Varchar).property('age', Int).create()
+schema.vertexLabel('software').ifNotExists().partitionBy('name', Varchar).property('lang', Varchar).property('version', Int).create()
+schema.edgeLabel('created').ifNotExists().from('person').to('software').partitionBy(OUT, 'name', 'person_name').clusterBy(IN, 'name', 'software_name', Asc).property('weight', Double).create()
+
+schema.edgeLabel('created').from('person').to('software').materializedView('person__created__software_by_software_name').ifNotExists().partitionBy(IN, 'name').clusterBy(OUT, 'name', Asc).create()
+```
+You can copy the script and run it on your production server to create your graph schema.

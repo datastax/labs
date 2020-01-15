@@ -7,7 +7,7 @@ Here's the compatibility scheme:
 
 * _GraphSON 1_, _Gryo 1_: only **scripts** allowed, only for **Classic** graph
 * _GraphSON 2_: **Script** and **bytecode** queries allowed, only for **Classic** graph
-* _GraphSON 3_, _Gryo 3_: **Scripts** and **bytecode** allowed for **Native**
+* _GraphSON 3_, _Gryo 3_: **Scripts** and **bytecode** allowed for **Core**
  graph
 * System requests without a Graph name defined / without alias (system queries) do not require a 
 specific protocol.

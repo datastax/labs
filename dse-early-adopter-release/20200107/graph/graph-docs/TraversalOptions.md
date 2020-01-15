@@ -76,3 +76,86 @@ There's no additional performance penalty to using `with('ignore-unindexed')`. T
 ---
 
 
+#### Controlling read-before-write warnings
+
+Graph looks for traversals matching one of two patterns:
+
+* Read a vertex by its ID, then write a property to the vertex
+* Read a pair of vertices by their IDs, then write an edge between the vertices
+
+Here are sample traversals matching these patterns, in the same respective order as the list above:
+
+* `g.V().hasLabel('customer').has('name', 'Cat').property('zone', 1)`
+* `g.V().hasLabel('customer').has('name', 'A').as('a').V().hasLabel('customer').has('name', 'B').addE('knows').from('a')`
+
+For the purpose of these two example traversals, assume that the `customer` vertex label's primary key consists only of the `name` property key.  `zone` is not part of the primary key.
+
+If graph finds a traversal matching one of these general patterns, it will emit a warning message.  The warning message includes an alternative traversal that exchanges the read-before-write pattern for a write-only pattern. 
+
+To override this behavior, begin the traversal by `g.with('read-before-write', '<val>')`, where `<val>` is either `warn` or `ignore`.  When set to `ignore`, warnings are suppressed.  When set to `warn`, warnings are emitted (the default).  All other values are reserved for potential future use.
+
+For example, to disable read-before-write warnings on the first sample traversal in this section, run:
+
+`g.with('read-before-write', 'ignore').V().hasLabel('customer').has('name', 'Cat').property('zone', 1)`
+
+
+#### Setting Read/Write Consistency Levels
+
+It is possible configure consistency levels for Reads & Writes. Available consistency levels are:
+
+* ANY / ONE / TWO / THREE / QUORUM / ALL / LOCAL_QUORUM / EACH_QUORUM / LOCAL_ONE
+
+Below are examples showing how to configure those consistency levels:
+
+* Reads: `g.with("consistency", QUORUM).V().has('age', 30).out()`
+* Writes: `g.with("consistency", LOCAL_QUORUM).addV('person').property('id', 232).property('age', 23)`
+
+
+#### Controlling unlabelled element warnings
+
+Graph looks for vertex and edge-traversal steps without label restrictions.  If it finds one or more such steps in a traversal, then it issues a warning.
+
+Here are sample traversals that would trigger this warning:
+
+* `g.V().has('name', 'Cat')`
+* `g.V().hasLabel('customer').has('name', 'Cat').out()`
+* `g.E().has('id', 'edge_id')`
+
+To override this warning behavior, begin the traversal by `g.with('label-warning', false)`.
+
+For example, to disable element warnings on the first sample traversal in this section, run:
+
+`g.with('label-warning', false).V().has('name', 'Cat')`
+
+
+#### Writing with Logged Batches
+
+By default, graph traversals do not use batches.
+
+Logged batching can be enabled by adding the `with` step and `batch` on the traversal source `g`.  This groups all data-modification CQL statements associated with the traversal into a single logged batch.
+
+Consistent with preceding subsections in this document, here is a minimal traversal that activates logged batching using its `with` option:
+
+
+```
+g.with('batch').V().has('name', 'Cat').set('initial', 'C')
+```
+
+Here's an example traversal that inserts two vertices in a single logged batch:
+
+```
+schema.vertexLabel("person").partitionBy("name", Text).create()
+g.with('batch').
+	addV("person").property("name", "alice").
+        addV("person").property("name", "bob")
+```
+
+Here's an example traversal that uses logged batching with TinkerPop's `inject` step.  This approach can help control traversal step bloat as the set of data mutated by a single batch grows.
+
+
+```
+persons = [ [ "name": "alice" ], [ "name": "bob" ], [ "name": "charlie" ] ]
+g.with('batch').inject(persons).sideEffect(unfold().addV("person").property("name", select("name")))
+```
+
+Unlogged batches are currently unsupported (as are counter batches).

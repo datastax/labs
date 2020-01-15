@@ -1,18 +1,18 @@
-# Migrate Classic Engine Graph to Native Engine Graph
+# Migrate Classic Engine Graph to Core Engine Graph
 If you are an existing DataStax Graph user and are looking to upgrade to this version of DataStax Graph, then please contact your 
 DataStax representative to discuss best practices and lessons learned on how to do this with the DataStax services team.
 
 ## Schema migration
-The migration tool gives users a way of converting the schema of an existing Classic Engine graph to Native Engine graph. 
+The migration tool gives users a way of converting the schema of an existing Classic Engine graph to Core Engine graph. 
 The generated schema can either be CQL or Gremlin.
 
 ## Restrictions
-Native Engine graphs do not support meta/multi-properties, and these schema elements will be translated into regular single cardinality properties.
+Core Engine graphs do not support meta/multi-properties, and these schema elements will be translated into regular single cardinality properties.
 Indexing, caching and TTL will also be dropped from schema. See [Deprecated features](DeprecatedFeatures.md) for more information.
 
 ## Usage 
 ```
-dse graph-migrate-schema -cql|-gremlin <classic_graph> <native_graph>
+dse graph-migrate-schema -cql|-gremlin <classic_graph> <core_graph>
 ```
 
 ## Example
@@ -209,7 +209,7 @@ Core Engine will tell you what index you need to create to allow this traversal 
 Cut and paste the index schema statement to execute and create the index:
 ```
 One or more indexes are required to execute the traversal: g.V().hasLabel("software").has("name","studio").in()
-Failed step: DseVertexStep(__.in())
+Failed step: __.in()
 CQL execution: No table or view could satisfy the query 'SELECT * FROM crew.person__created__software WHERE software_name = ?'
 The output of 'schema.indexFor(<your_traversal>).analyze()' suggests the following indexes could be created to allow execution:
 

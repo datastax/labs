@@ -23,7 +23,7 @@ system.graph("test_core").
 Core Engine graphs are created with `durableWrites` set to `true` by default.
 If necessary, user can specify the setting when creating the graph:
 ```
-system.graph("test_Core").
+system.graph("test_core").
     ifNotExists().
     withReplication("{'class': 'NetworkTopologyStrategy', '<DC_NAME>': <REPLICATION_FACTOR>}").
     andDurableWrites(false).
@@ -273,12 +273,85 @@ CREATE TABLE test_core.person__created__software (
 
 ```
 
-Generally the pattern for specifying the mapping columns is `partitionBy(direction,sourceProperty,targetProperty)` / `clusterBy(direction,sourceProperty,targetProperty)` where:
+Generally the pattern for specifying the mapping columns is `partitionBy(direction,sourceProperty,targetProperty)` / `clusterBy(direction,sourceProperty,targetProperty[,order])` where:
 
 * `direction` can be only `OUT` for `partitionBy(..)`  and `IN` / `OUT` for `clusterBy(..)`
 * `sourceProperty` is the name of the property/column from the source vertex label table
 * `targetProperty` is the name of the mapping property/column in the edge label table. If `targetProperty` is not specified, then it will default to `direction.name().toLowerCase() + "_" + sourceProperty`
+* `order`, if present, is either `Asc` (the default) or `Desc`
 
+#### Default Edge Table Layout
+
+When creating an edge label, its primary key will be composed and internally ordered by the following categories:
+
+1. Partitioning columns specific to the edge label, in definition order
+2. Partition key columns on the `from(..)` vertex label's table, in they order they appear there
+3. Clustering columns defined on the `from(..)` vertex label's table, in the order they appear there
+4. Clustering columns specific to the edge label, in definition order
+5. Primary key columns (both partition key and clustering) defined in the `to(..)` vertex label's table, in the order they appear there
+
+The first two categories become partition key columns in the created edge table.  The last three categories become
+clustering columns in the created edge table.
+
+When an edge label is created with one or more `partitionBy(..)` or `clusterBy(..)` clauses, each such clause moves its
+associated edge column from its default position to the head of either category one or category four, respectively.
+This holds for both mapping columns and for columns that are specific to the edge label itself.
+
+The order in which an edge label's `partitionBy(..)` and `clusterBy(..)` clauses appear is significant.  If multiple
+clauses are specified on a single edge label, then their relative ordering is preserved as they move together to their
+new category.
+
+For example, here is a variation on the `created` edge label that mostly relies on default ordering:
+
+
+This leads to the following CQL Schema:
+```
+CREATE TABLE t.person__created_via_defaults__software (
+    creation_date text,
+    person_name text,
+    person_age int,
+    person_year int,
+    creation_year int,
+    software_name text,
+    software_year int,
+    software_license text,
+    PRIMARY KEY ((creation_date, person_name, person_age), person_year, creation_year, software_name, software_year, software_license)
+) WITH CLUSTERING ORDER BY (person_year ASC, creation_year DESC, software_name ASC, software_year ASC, software_license ASC)
+    AND EDGE LABEL created_via_defaults
+    FROM person((person_name, person_age), person_year)
+    TO software(software_name, software_year, software_license);
+```
+
+Here's a related example that partially overrides the default clustering column order:
+
+```
+schema.edgeLabel('created_cluster_by_license').
+    from('person').to('software').
+    partitionBy('creation_date', Text).
+    clusterBy(IN, 'license', 'software_license').
+    clusterBy(OUT, 'year', 'person_year').
+    create()
+```
+
+This leads to the following CQL schema:
+```
+CREATE TABLE t.person__created_cluster_by_license__software (
+    creation_date text,
+    person_name text,
+    person_age int,
+    software_license text,
+    person_year int,
+    software_name text,
+    software_year int,
+    PRIMARY KEY ((creation_date, person_name, person_age), software_license, person_year, software_name, software_year)
+) WITH CLUSTERING ORDER BY (software_license ASC, person_year ASC, software_name ASC, software_year ASC)
+    AND EDGE LABEL created_cluster_by_license
+    FROM person((person_name, person_age), person_year)
+    TO software(software_name, software_year, software_license)
+```
+
+If the edge label `create()` statement had not mentioned the `person_year` mapping column, then it would have taken its
+default position in the primary key as the first clustering column.
 
 ## Dropping a Vertex/Edge Label
 
@@ -430,6 +503,30 @@ schema.edgeLabel('created').
     create()
 ```
 
+Syntactic sugar exists for creating an edge materialized view index supporting traversals against the edge's natural direction.  To use it, insert a `inverse()` call after `ifNotExists()` and before any `partitionBy`/`clusterBy` calls.  The partition key of the resulting materialized view will be composed of any partition key columns on to-vertex combined with any supplemental partition key columns added to the edge table when the edge label was defined.  Here's an example:
+
+```
+schema.edgeLabel('created').
+    from('person').to('software').
+    materializedView('person_software_inv').
+    ifNotExists().
+    inverse().
+    create()
+```
+
+This creates the following materialized view:
+
+```
+CREATE MATERIALIZED VIEW t.person_software_inv AS
+    SELECT *
+    FROM t.person__created__software
+    WHERE creation_date IS NOT NULL AND software_name IS NOT NULL AND software_year IS NOT NULL AND software_license IS NOT NULL AND creation_year IS NOT NULL AND person_name IS NOT NULL AND person_age IS NOT NULL AND person_year IS NOT NULL
+    PRIMARY KEY ((creation_date, software_name), software_year, software_license, creation_year, person_name, person_age, person_year)
+    WITH CLUSTERING ORDER BY (software_year ASC, software_license ASC, creation_year DESC, person_name ASC, person_age ASC, person_year ASC)
+```
+
+The `inverse()` shortcut follows the same column ordering rules described under the Default Edge Table Layout section, except for reversing the sense of the from-vertex and to-vertex.
+
 #### Secondary Indexes
 
 This will create a secondary index on the property/column `coffeePerDay`.
@@ -441,7 +538,7 @@ schema.vertexLabel('person').
     create()
 ```
 
-The below example will create a column `map` of type `frozen(mapOf(Int, Text))` and index it via secondary index. Using `indexFull()` in this example will index the entire map. Available collection indexing options are `indexKeys()` / `indexValues()` / `indexEntries()` / `indexFull()`. See [here](https://docs.datastax.com/en/dse/6.0/cql/cql/cql_using/useIndexColl.html) for additional details about indexing collections.
+The below example will create a column `map` of type `frozen(mapOf(Int, Text))` and index it via secondary index. Using `indexFull()` in this example will index the entire map. Available collection indexing options are `indexKeys()` / `indexValues()` / `indexEntries()` / `indexFull()`. See [here](https://docs.datastax.com/en/dse/6.8/cql/cql/cql_using/useIndexColl.html) for additional details about indexing collections.
 ```
 schema.edgeLabel('person').
     addProperty('map', frozen(mapOf(Int, Text))).
@@ -502,7 +599,7 @@ schema.vertexLabel('software').
 * `asText()`: will be using a **tokenized** (`TextField`) field
 * if no indexing type is specified, it will be using a `StrField` and a `TextField` copy field, which means that all textual predicates (token, tokenPrefix, tokenRegex, eq, neq, regex, prefix) will be usable.
 
-Additional details about indexing types and when to use which one can be found in the DSE [docs](https://docs.datastax.com/en/dse/6.0/dse-dev/datastax_enterprise/graph/using/useSearchIndexes.html).
+Additional details about indexing types and when to use which one can be found in the DSE [docs](https://docs.datastax.com/en/dse/6.8/dse-dev/datastax_enterprise/graph/using/useSearchIndexes.html).
 
 ##### Dropping Indexed properties
 
@@ -573,6 +670,39 @@ schema.edgeLabel('created').
     from('person').to('software').
     searchIndex().
     drop()
+```
+
+### Waiting for indexing to finish before querying data
+
+The Schema API provides an optional `.waitForIndex(<optionalTimeoutInSeconds>)` method that can be used during index creation
+and allows to wait the specified timeout until a created index is built.
+
+The default timeout value is **10s**. Below are some examples for each index type:
+
+```
+schema.vertexLabel('person').
+    materializedView('by_coffee').
+    partitionBy('coffeePerDay').
+    waitForIndex().
+    create()
+```
+
+```
+schema.vertexLabel('person').
+    secondaryIndex('by_coffee').
+    ifNotExists().
+    by('coffeePerDay').
+    waitForIndex(5).
+    create()
+```
+
+```
+schema.vertexLabel('software').
+    searchIndex().
+    by('name').
+    by('license').
+    waitForIndex(30).
+    create()
 ```
 
 ## Using Complex Types
@@ -788,7 +918,8 @@ Here's an overview of how the column types map to their java types:
 |typeOf(..)|com.datastax.driver.core.UDTValue.class|
 
 
-An example of how to insert data for all types is shown below. Please note that you can't do `.property('inet', InetAddress.getByName('localhost'))` because our Sandbox is currently blocking this.
+An example of how to insert data for all types is shown below.
+
 ```
 g.addV('allTypes').
     property('id', 232).
@@ -801,7 +932,8 @@ g.addV('allTypes').
     property('double', 2.3d).
     property('duration', 'PT10H' as Duration).
     property('float', 2.3f).
-    //property('inet', InetAddress.getByName('localhost')).
+    property('inet', '192.168.1.2' as InetAddress).
+    property('inet', '2001:4860:4860::8888' as InetAddress).
     property('int', 23).
     property('linestring', [1, 1, 2, 2, 3, 3] as LineString)).
     property('linestring', 'LINESTRING (30 10, 10 30, 40 40)' as LineString)).

@@ -1,5 +1,5 @@
 # DataStax Graph Frames
-This guide is broken down into two main sections, a [DataStax Graph Frames API](#datastax-graph-frames-api) section describing fundamental methods for managing data, and a [Best Practices Guide for Loading Data](#best-practices-guide-for-loading-data) section highlighting recommended practices.
+This guide is broken down into three main sections, a [DataStax Graph Frames API](#datastax-graph-frames-api) section describing fundamental methods for managing data, a [Best Practices Guide for Loading Data](#best-practices-guide-for-loading-data) section highlighting recommended practices, and a general [How-to](#how-to) section showing examples of common operations.
 
 The DseGraphFrame package provides a Spark API for bulk operations and analytics on DataStax Graph. It is inspired by Databricks’ GraphFrame library and supports a subset of Apache TinkerPop™ Gremlin graph traversal language. It supports reading of DataStax Graph data into a GraphFrame and writing GraphFrames from any format supported by Spark into DataStax Graph.
 For a review of our initial offering and more introductory examples see our [Introducing DataStax Graph Frames](https://www.datastax.com/dev/blog/dse-graph-frame) blog post.
@@ -606,7 +606,7 @@ When indexing with Materialized Views is desired, it is often recommended to ena
 because it significantly affects insertions performance. We expect about a 10% performance penalty per MV, and there are 
 some subtleties to be aware of when defining the data model, see this [blog](https://www.datastax.com/dev/blog/materialized-view-performance-in-cassandra-3-x) for more details.
 
-After data is loaded, and one enables indexing, how do we know when it's done? There is a [nodetool viewbuildstatus](https://docs.datastax.com/en/dse/6.7/dse-admin/datastax_enterprise/tools/nodetool/toolsViewBuildStatus.html) command 
+After data is loaded, and one enables indexing, how do we know when it's done? There is a [nodetool viewbuildstatus](https://docs.datastax.com/en/dse/6.8/dse-admin/datastax_enterprise/tools/nodetool/toolsViewBuildStatus.html) command 
 for accomplishing exactly this.
 
 ##### How to model multi/meta-properties
@@ -1184,7 +1184,7 @@ see [updateVertices](#updatevertices) and [updateEdges](#updateedges) for more d
 #### Tuning Considerations for Loading Big Graphs
 ##### Spark Cassandra Connector tuning parameters still apply with DataStax Graph Frames
 To increase write performance during DataStax Graph Frames (DGF) bulk loading, remember that our existing Spark Cassandra Connector 
-tuning parameters still apply: [Setting Spark Cassandra Connector Specific Properties](https://docs.datastax.com/en/dse/6.7/dse-dev/datastax_enterprise/spark/sparkCassandraProperties.html?hl=setting%2Cspark%2Ccassandra%2Cconnector-specific%2Cproperties) 
+tuning parameters still apply: [Setting Spark Cassandra Connector Specific Properties](https://docs.datastax.com/en/dse/6.8/dse-dev/datastax_enterprise/spark/sparkCassandraProperties.html?hl=setting%2Cspark%2Ccassandra%2Cconnector-specific%2Cproperties) 
 
 For example, `spark.cassandra.output.concurrent.writes` has been found to be one of the most intuitive and effective parameters 
 to play with during load testing. Other parameters such as `spark.cassandra.output.throughput_mb_per_sec` can be very helpful as well, 
@@ -1215,3 +1215,37 @@ and overall node health during the process (e.g. look out for obvious things lik
 Also, increasing the cluster size can serve as an effective strategy in reducing individual node stress and improving 
 overall ingestion performance. Again there is not a one-size-fits-all solution here, but an incremental approach with 
 reasonably chosen tuning parameters and environment setup is a good approach.
+
+### How-to
+
+#### Copy a graph from one cluster to another
+
+In DSE versions 5.1.15+, 6.0.8+, 6.7.4+, and 6.8.0+ (DSP-18605) we have the ability to specify which host a DseGraphFrame object should connect with. This allows a user to read graph contents from one cluster and write to another.
+
+Suppose we want to copy vertices and edges from a remote cluster to the local cluster.
+```scala
+spark.setCassandraConf("cluster1", CassandraConnectorConf.ConnectionHostParam.option("10.0.0.1"))
+spark.setCassandraConf("cluster2", CassandraConnectorConf.ConnectionHostParam.option("10.0.0.2"))
+
+spark.conf.set("cluster", "cluster1")
+val source = spark.dseGraph("srcGraph")
+
+spark.conf.set("cluster", "cluster2")
+val dst = spark.dseGraph("dstGraph")
+
+dst.updateVertices(src.V)
+dst.updateEdges(src.E)
+```
+
+In DSE 6.8 and newer, we can inline the cluster mapping step when creating the DseGraphFrame object.
+```scala
+spark.setCassandraConf("cluster1", CassandraConnectorConf.ConnectionHostParam.option("10.0.0.1"))
+spark.setCassandraConf("cluster2", CassandraConnectorConf.ConnectionHostParam.option("10.0.0.2"))
+
+val source =  spark.dseGraph("srcGraph", Map ("cluster" -> "cluster1") )
+val dst =  spark.dseGraph("dstGraph", Map ("cluster" -> "cluster2"))
+
+dst.updateVertices(src.V)
+dst.updateEdges(src.E)
+
+```

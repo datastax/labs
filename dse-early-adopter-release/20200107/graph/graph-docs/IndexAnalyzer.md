@@ -55,6 +55,8 @@ schema.vertexLabel('person').materializedView('person_by_phone_age_Desc').ifNotE
 
 The index analyzer will pick a Search Index if the predicate is Search-specific, such as `token` / `tokenPrefix` / `tokenRegex` / `tokenFuzzy` / `phrase` / `regex` / `prefix` / `fuzzy`.
 Additional predicates that require a Search Index are Geo predicates (`inside` / `insideCartesian`) and `neq` / `without`.
+The index analyzer will suggest creating a Search index when having multiple conditions, where some of the conditions are against a CQL List/Set. However, note that
+a Search index currently can't handle Maps.
 
 The below example uses the predicate `regex` and filters on `age` and so the index analyzer will suggest a Search Index: 
 ```
@@ -125,32 +127,23 @@ schema.vertexLabel('a').secondaryIndex('a_2i_by_list').ifNotExists().by('list').
 schema.vertexLabel('b').secondaryIndex('b_2i_by_list').ifNotExists().by('list').indexValues().create()
 ```
 
-The traversal `g.V().has("list", contains(23)).has("age", 23)` would require a Secondary Index (due to filtering on a CQL collection) and a Materialized View for each table.
-Since no vertex label filtering is performed, the index analyzer will suggest six indexes in total:
+The traversal `g.V().has("list", contains(23)).has("age", 23)` would require a Search index for each table because a Secondary index can always only be applied to a single column:
 ```
 gremlin> schema.indexFor(g.V().has("list", contains(23)).has("age", 23)).analyze()
 ==>Traversal requires that the following indexes are created:
-schema.vertexLabel('c').materializedView('c_by_age').ifNotExists().partitionBy('age').clusterBy('id', Asc).create()
-schema.vertexLabel('c').secondaryIndex('c_2i_by_list').ifNotExists().by('list').indexValues().create()
-schema.vertexLabel('a').materializedView('a_by_age').ifNotExists().partitionBy('age').clusterBy('id', Asc).create()
-schema.vertexLabel('a').secondaryIndex('a_2i_by_list').ifNotExists().by('list').indexValues().create()
-schema.vertexLabel('b').materializedView('b_by_age').ifNotExists().partitionBy('age').clusterBy('id', Asc).create()
-schema.vertexLabel('b').secondaryIndex('b_2i_by_list').ifNotExists().by('list').indexValues().create()
+schema.vertexLabel('b').searchIndex().ifNotExists().by('age').by('list').create()
+schema.vertexLabel('a').searchIndex().ifNotExists().by('age').by('list').create()
+schema.vertexLabel('c').searchIndex().ifNotExists().by('age').by('list').create()
 ```
 
-The traversal `g.V().has("list", contains(23)).has("age", 23).has("name", Search.regex(".*ohn"))` would also require two indexes per table.
-A Secondary Index (due to filtering on a CQL collection) and a search index (due to `regex`). The index analyzer will not create a Materialized View for `age`
-as was shown in the previous example, but rather use the search index for that:
+The traversal `g.V().has("list", contains(23)).has("age", 23).has("name", Search.regex(".*ohn"))` would also require a single Search index per table:
 
 ```
 gremlin> schema.indexFor(g.V().has("list", contains(23)).has("age", 23).has("name", Search.regex(".*ohn"))).analyze()
 ==>Traversal requires that the following indexes are created:
-schema.vertexLabel('c').searchIndex().ifNotExists().by('age').by('list').by('name').create()
-schema.vertexLabel('c').secondaryIndex('c_2i_by_list').ifNotExists().by('list').indexValues().create()
-schema.vertexLabel('a').searchIndex().ifNotExists().by('age').by('list').by('name').create()
-schema.vertexLabel('a').secondaryIndex('a_2i_by_list').ifNotExists().by('list').indexValues().create()
 schema.vertexLabel('b').searchIndex().ifNotExists().by('age').by('list').by('name').create()
-schema.vertexLabel('b').secondaryIndex('b_2i_by_list').ifNotExists().by('list').indexValues().create()
+schema.vertexLabel('a').searchIndex().ifNotExists().by('age').by('list').by('name').create()
+schema.vertexLabel('c').searchIndex().ifNotExists().by('age').by('list').by('name').create()
 ```
 
 ---
@@ -160,11 +153,3 @@ schema.vertexLabel('b').secondaryIndex('b_2i_by_list').ifNotExists().by('list').
 It is generally always recommended to use an element label when filtering as otherwise multiple CQL statements will be executed and data might get filtered in-memory by Tinkerpop and not by C* 
 
 ---
-
-When filtering on the vertex label `a` in `g.V().hasLabel("a").has("list", contains(23)).has("age", 23).has("name", Search.regex(".*ohn"))`, the index analyzer will fail to suggest any indexes, because it tries to leverage a search index for both conditions:
-```
-gremlin> schema.indexFor(g.V().hasLabel("a").has("list", contains(23)).has("age", 23).has("name", "hans")).analyze()
-==>Failed to suggest indexes for traversal. Some steps in the traversal might not be supported yet.
-```
-
-This is currently a limitation that will be addressed in a future release.

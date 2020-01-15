@@ -16,7 +16,7 @@ cqlsh> select * from system_schema.keyspaces;
 
  keyspace_name      | durable_writes | graph_engine | replication
 --------------------+----------------+--------------+-------------------------------------------------------------------------------------
-               test |           True |       Core | {'class': 'org.apache.cassandra.locator.SimpleStrategy', 'replication_factor': '1'}
+               test |           True |         Core | {'class': 'org.apache.cassandra.locator.SimpleStrategy', 'replication_factor': '1'}
         system_auth |           True |         null | {'class': 'org.apache.cassandra.locator.SimpleStrategy', 'replication_factor': '1'}
  ...
              system |           True |         null |                             {'class': 'org.apache.cassandra.locator.LocalStrategy'}
@@ -159,7 +159,7 @@ Running a traversal without specifying the additional partition key `X` will res
 ```
 g.V().outE("created")
 One or more indexes are required to execute the traversal: g.V().outE("created")
-Failed step: DseVertexStep(__.outE().hasLabel("created"))
+Failed step: __.outE().hasLabel("created")
 CQL execution: No table or view could satisfy the query 'SELECT * FROM test.person__created__software WHERE person_firstname = ? AND person_lastname = ? AND person_age = ?'
 The output of 'schema.indexFor(<your_traversal>).analyze()' suggests the following indexes could be created to allow execution:
 
