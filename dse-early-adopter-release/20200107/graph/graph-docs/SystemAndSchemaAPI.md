@@ -375,6 +375,15 @@ schema.edgeLabel('created').
     drop()
 ```
 
+In order to only drop the specific CQL table behind the `person->created->software` connection, you can do:
+```
+schema.edgeLabel('created').
+    from('person').
+    to('software').
+    ifExists().
+    drop()
+```
+
 ## Dropping a Vertex/Edge Label's Metadata
 
 #### Dropping a Vertex Label's Metadata
