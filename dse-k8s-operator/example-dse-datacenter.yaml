@@ -9,7 +9,7 @@ spec:
   managementApiAuth:
     insecure: {}
   size: 3
-  storageclaim:
+  storageClaim:
     storageclassname: dse-storage
     resources:
       requests:
