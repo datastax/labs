@@ -7,3 +7,4 @@ choose the newest version if you are just getting started.
 | Version | Date Released | Notes |
 | ------- | ------------- | ----- |
 | [20200107](./20200107) | 2020-01-07 | First EAP release |
+| [20200226](./20200226) | 2020-02-26 | Second EAP release |
