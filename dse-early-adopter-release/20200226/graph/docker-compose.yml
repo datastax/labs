@@ -26,7 +26,7 @@ services:
 
   studio:
     container_name: my-studio
-    image: "datastaxlabs/datastax-studio:6.8.0.20200226"
+    image: "datastaxlabs/dse-studio-early-adopter-release:6.8.0.20200226"
 #    environment:
 #      - DS_LICENSE=accept
     ports:
