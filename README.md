@@ -15,10 +15,6 @@ Refer to the [dse-early-adopter-release](dse-early-adopter-release) directory.
 
 Refer to the [dse-k8s-operator](dse-k8s-operator) directory.
 
-### DataStax Java Driver Spring Boot Starter Labs
-
-Refer to the [spring-boot-starter](spring-boot-starter) directory.
-
 ### DataStax Kafka Connector CDC Source
 
 Refer to the [kafka-connector-cdc](kafka-connector-cdc) directory.
