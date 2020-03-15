@@ -14,6 +14,15 @@ Connector.
    Labs](https://downloads.datastax.com/#labs) and place it within this
    directory.
 
+## Docker Configuration Dependencies
+
+* Docker Desktop's default memory configuration of **2 GB** is not enough to support this bundle of containers.
+  * Instructions for changing Docker's memory configuration is linked here for [Mac](https://docs.docker.com/docker-for-mac/) and [Windows](https://docs.docker.com/docker-for-windows/)
+  * Note:  Setting Docker Desktop for Mac's configuration to **8 GB** is confirmed to work.
+* One can confirm a container can't start due to a Docker memory constraint using:
+  * "docker ps -a" and check for [exit code 137](https://success.docker.com/article/what-causes-a-container-to-exit-with-code-137)
+  * And/or use "docker inspect <container id>" to check if "OOMKilled" is true
+
 ## Start the DataStax Enterprise and Apache Kafka Components
 
 Note that the Source functionality of this connector will **ONLY** work with a
