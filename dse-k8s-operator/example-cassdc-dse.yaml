@@ -13,10 +13,10 @@ spec:
   serverType: dse
 
   # the image to use for the server
-  serverImage: datastaxlabs/dse-server-early-adopter-release:6.8.0.20200226
+  serverImage: datastaxlabs/dse-k8s-server:6.8.0-20200316
   
   # the image to use for the config builder init container
-  configBuilderImage: datastaxlabs/dse-k8s-config-builder:0.4.0-20191113
+  configBuilderImage: datastaxlabs/dse-k8s-config-builder:0.9.0-20200316
 
   # the version of the server
   imageVersion: "6.8.0"
