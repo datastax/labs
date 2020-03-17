@@ -258,6 +258,19 @@ spec:
 
 ### Using a specific image
 
+Cassandra:
+```yaml
+apiVersion: datastax.com/v1alpha1
+kind: CassandraDatacenter
+metadata:
+  name: dtcntr
+spec:
+  serverType: cassandra
+  imageVersion: 3.11.6
+  serverImage: datastaxlabs/apache-cassandra-with-mgmtapi:3.11.6-20200316
+```
+
+DSE:
 ```yaml
 apiVersion: datastax.com/v1alpha1
 kind: CassandraDatacenter
@@ -410,8 +423,7 @@ self-orchestrating. After creating your cluster, [Enable
 NodeSync](https://docs.datastax.com/en/dse/6.7/dse-admin/datastax_enterprise/tools/dseNodesync/dseNodesyncEnable.html)
 on all new tables.
 
-In the future the operator will support deploying http://cassandra-reaper.io/ for
-Cassandra clusters.
+Future releases may include integration with open source repair services for Cassandra clusters.
 
 ## Backup
 
@@ -448,7 +460,18 @@ this time.
 
 ## v0.9.0
 
-* The operator can work with OSS Apache Cassandra.
+* KO-146 Create a secret for superuser creation if one is not provided.
+* KO-288 The operator can provision Cassandra clusters using images from
+  https://github.com/datastax/management-api-for-apache-cassandra and the primary
+  CRD the operator works on is a `v1alpha2` `cassandra.datastax.com/CassandraDatacenter`
+* KO-210 Certain `CassandraDatacenter` inputs were not rolled out to pods during
+  rolling upgrades of the cluster. The new process considers everything in the
+  statefulset pod template.
+* KO-276 Greatly improved integration tests on real KIND / GKE Kubernetes clusters
+  using Ginkgo.
+* KO-223 Watch fewer Kubernetes resources.
+* KO-232 Following best practices for assigning seed nodes during cluster start.
+* KO-92 Added a container that tails the system log.
 
 ## v0.4.1
 * KO-190 Fix bug introduced in v0.4.0 that prevented scaling up or deleting
