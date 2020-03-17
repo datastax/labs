@@ -91,7 +91,7 @@ $ kubectl -n my-db-ns apply -f ./datastax-operator-manifests.yaml
 
 $ kubectl -n my-db-ns get pod
 NAME                               READY   STATUS    RESTARTS   AGE
-dse-operator-f74447c57-kdf2p       1/1     Running   0          1h
+cass-operator-f74447c57-kdf2p       1/1     Running   0          1h
 ```
 
 When the pod status is `Running`, the operator is ready to use.
@@ -266,7 +266,7 @@ metadata:
 spec:
   serverType: dse
   imageVersion: 6.8.0
-  dseImage: datastaxlabs/dse-k8s-server:6.8.0-20200316
+  serverImage: datastaxlabs/dse-k8s-server:6.8.0-20200316
 ```
 
 ## Example Config
@@ -280,7 +280,7 @@ metadata:
   name: dc1
 spec:
   clusterName: cluster1
-  dseImage: datastaxlabs/dse-k8s-server:6.8.0-20200316
+  serverImage: datastaxlabs/dse-k8s-server:6.8.0-20200316
   serverType: dse
   imageVersion: 6.8.0
   managementApiAuth:
@@ -325,7 +325,7 @@ $ kubectl -n my-db-ns apply -f ./cluster1-dc1.yaml
 
 $ kubectl -n my-db-ns get pods
 NAME                            READY   STATUS    RESTARTS   AGE
-dse-operator-f74447c57-kdf2p    1/1     Running   0          13m
+cass-operator-f74447c57-kdf2p   1/1     Running   0          13m
 gke-cluster1-dc1-r1-sts-0       1/1     Running   0          5m38s
 gke-cluster1-dc1-r2-sts-0       1/1     Running   0          42s
 gke-cluster1-dc1-r3-sts-0       1/1     Running   0          6m7s
@@ -378,8 +378,8 @@ the `Example Config` section above, and re-apply it precisely as before. The
 operator will add pods to your datacenter, provided there are sufficient
 Kubernetes worker nodes available.
 
-For racks to act effectively as a fault-containment zone, each rack in the DSE
-cluster must contain the same number of DSE instances.
+For racks to act effectively as a fault-containment zone, each rack in the
+cluster must contain the same number of instances.
 
 ## Change server configuration
 
