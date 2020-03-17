@@ -10,7 +10,7 @@ and managing Cassandra or DSE in a Kubernetes cluster.
 1. A Kubernetes cluster. Kubernetes v1.15 is recommended, but Kubernetes
    v1.13 has been tested and works provided the line containing
    `x-kubernetes-preserve-unknown-fields: true` is deleted from
-   `datastax-operator-manifests.yaml`.
+   `cass-operator-manifests.yaml`.
 2. The ability to download images from Docker Hub from within the Kubernetes
    cluster.
 
@@ -78,7 +78,7 @@ following:
 Generally, `cluster-admin` privileges are required to register a
 `CustomResourceDefinition` (CRD). All privileges needed by the operator are
 present within the
-[operator-manifests YAML](operator-manifests.yaml).
+[operator-manifests YAML](cass-operator-manifests.yaml).
 _Note the operator does not require `cluster-admin` privileges, only the user
 defining the CRD requires those permissions._
 
@@ -87,7 +87,7 @@ watch the progress by getting the list of pods for the namespace, as
 demonstrated below:
 
 ```shell
-$ kubectl -n my-db-ns apply -f ./datastax-operator-manifests.yaml
+$ kubectl -n my-db-ns apply -f ./cass-operator-manifests.yaml
 
 $ kubectl -n my-db-ns get pod
 NAME                               READY   STATUS    RESTARTS   AGE
