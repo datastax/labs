@@ -187,6 +187,8 @@ will be created for it, named `<cluserName>-superuser`. It will contain `usernam
 and `password` keys.
 
 ```shell
+# Run these commands AFTER you've created your CassandraDatacenter
+
 $ kubectl -n my-db-ns get secret cluster1-superuser
 NAME                       TYPE                                  DATA   AGE
 cluster1-superuser         Opaque                                2      13m
@@ -221,7 +223,7 @@ To use this new superuser secret, specify the name of the secret from
 within the `CassandraDatacenter` config yaml that you load into the cluster:
 
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dtcntr
@@ -246,7 +248,7 @@ If `serverImage` is not specified, a default image for the provided `serverType`
 ### Using a default image
 
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dtcntr
@@ -260,7 +262,7 @@ spec:
 
 Cassandra:
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dtcntr
@@ -272,7 +274,7 @@ spec:
 
 DSE:
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dtcntr
@@ -287,7 +289,7 @@ spec:
 The following example illustrates a `CassandraDatacenter` resource.
 
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dc1
@@ -306,14 +308,14 @@ spec:
         - ReadWriteOnce
       resources:
         requests:
-          storage: 20Gi
+          storage: 10Gi
   racks:
     - name: r1
-      zone: us-central1-a
+      # zone: us-central1-a
     - name: r2
-      zone: us-central1-b
+      # zone: us-central1-b
     - name: r3
-      zone: us-central1-f
+      # zone: us-central1-f
   config:
     dse-yaml:
       authentication_options:
