@@ -221,7 +221,7 @@ To use this new superuser secret, specify the name of the secret from
 within the `CassandraDatacenter` config yaml that you load into the cluster:
 
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dtcntr
@@ -246,7 +246,7 @@ If `serverImage` is not specified, a default image for the provided `serverType`
 ### Using a default image
 
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dtcntr
@@ -260,7 +260,7 @@ spec:
 
 Cassandra:
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dtcntr
@@ -272,7 +272,7 @@ spec:
 
 DSE:
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dtcntr
@@ -287,7 +287,7 @@ spec:
 The following example illustrates a `CassandraDatacenter` resource.
 
 ```yaml
-apiVersion: datastax.com/v1alpha1
+apiVersion: cassandra.datastax.com/v1alpha2
 kind: CassandraDatacenter
 metadata:
   name: dc1
