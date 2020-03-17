@@ -187,6 +187,8 @@ will be created for it, named `<cluserName>-superuser`. It will contain `usernam
 and `password` keys.
 
 ```shell
+# Run these commands AFTER you've created your CassandraDatacenter
+
 $ kubectl -n my-db-ns get secret cluster1-superuser
 NAME                       TYPE                                  DATA   AGE
 cluster1-superuser         Opaque                                2      13m
