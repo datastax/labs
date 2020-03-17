@@ -1,37 +1,35 @@
 # Introduction
 
-DataStax Enterprise (DSE) is a distributed multi-model database built on Apache
-Cassandra. The DSE Operator for Kubernetes simplifies the process of deploying
-and managing DSE in a Kubernetes cluster.
+Cass Operator simplifies the process of deploying
+and managing Cassandra or DSE in a Kubernetes cluster.
 
 # Install the operator
 
 ## Prerequisites
 
-1. A Kubernetes cluster. Kubernetes v1.15.0 is recommended, but Kubernetes
-   v1.13.0 has been tested and works provided the line containing
+1. A Kubernetes cluster. Kubernetes v1.15 is recommended, but Kubernetes
+   v1.13 has been tested and works provided the line containing
    `x-kubernetes-preserve-unknown-fields: true` is deleted from
    `datastax-operator-manifests.yaml`.
 2. The ability to download images from Docker Hub from within the Kubernetes
    cluster.
-3. At least one Kubernetes worker node per DSE instance.
 
 ## Create a namespace
 
-The DSE operator is built to watch over pods running DSE in a Kubernetes
+cass-operator is built to watch over pods running Casandra or DSE in a Kubernetes
 namespace. Create a namespace for the cluster with:
 
 ```shell
-$ kubectl create ns my-dse-ns
+$ kubectl create ns my-db-ns
 ```
 
-For the rest of this guide, we will be using the namespace `my-dse-ns`. Adjust
+For the rest of this guide, we will be using the namespace `my-db-ns`. Adjust
 further commands as necessary to match the namespace you defined.
 
 ## Define a storage class
 
 Kubernetes uses the `StorageClass` resource as an abstraction layer between pods
-needing persistent storage and the physical storage resources that a specific
+needing persistent storage and the storage resources that a specific
 Kubernetes cluster can provide. We recommend using the fastest type of
 networked storage available. On Google Kubernetes Engine, the following
 example would define persistent network SSD-backed volumes.
@@ -40,7 +38,7 @@ example would define persistent network SSD-backed volumes.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: dse-storage
+  name: server-storage
 provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-ssd
@@ -49,38 +47,38 @@ volumeBindingMode: WaitForFirstConsumer
 ```
 
 The above example can be customized to suit your environment and saved as
-`dse-storage-class.yaml`. For the rest of this guide, we'll assume you've
-defined a `StorageClass` and named it `dse-storage`. You can apply that file and
+`server-storage.yaml`. For the rest of this guide, we'll assume you've
+defined a `StorageClass` and named it `server-storage`. You can apply that file and
 get the resulting storage classes from Kubernetes with:
 
 ```shell
-$ kubectl -n my-dse-ns apply -f ./dse-storage-class.yaml
+$ kubectl -n my-db-ns apply -f ./server-storage.yaml
 
-$ kubectl -n my-dse-ns get storageclass
+$ kubectl -n my-db-ns get storageclass
 NAME                 PROVISIONER            AGE
-gce-ssd              kubernetes.io/gce-pd   1m
+server-storage       kubernetes.io/gce-pd   1m
 standard (default)   kubernetes.io/gce-pd   16m
 ```
 
 ## Deploy the operator
 
 Within this guide, we have joined together a few Kubernetes resources into a
-single YAML file needed to deploy the DSE operator. This file defines the
+single YAML file needed to deploy the operator. This file defines the
 following:
 
 1. `ServiceAccount`, `Role`, and `RoleBinding` to describe a user and set of
    permissions necessary to run the operator. _In demo environments that don't
    have role-based access-control enabled, these extra steps are unnecessary but
    are harmless._
-2. `CustomResourceDefinition` for the `DseDatacenter` resources used to
-   configure clusters managed by the `dse-k8s-operator`.
+2. `CustomResourceDefinition` for the `CassandraDatacenter` resources used to
+   configure clusters managed by the `cass-operator`.
 3. Deployment to start the operator in a state where it waits and watches for
-   DseDatacenter resources.
+   CassandraDatacenter resources.
 
 Generally, `cluster-admin` privileges are required to register a
 `CustomResourceDefinition` (CRD). All privileges needed by the operator are
 present within the
-[datastax-operator-manifests YAML](datastax-operator-manifests.yaml).
+[operator-manifests YAML](operator-manifests.yaml).
 _Note the operator does not require `cluster-admin` privileges, only the user
 defining the CRD requires those permissions._
 
@@ -89,35 +87,35 @@ watch the progress by getting the list of pods for the namespace, as
 demonstrated below:
 
 ```shell
-$ kubectl -n my-dse-ns apply -f ./datastax-operator-manifests.yaml
+$ kubectl -n my-db-ns apply -f ./datastax-operator-manifests.yaml
 
-$ kubectl -n my-dse-ns get pod
+$ kubectl -n my-db-ns get pod
 NAME                               READY   STATUS    RESTARTS   AGE
 dse-operator-f74447c57-kdf2p       1/1     Running   0          1h
 ```
 
 When the pod status is `Running`, the operator is ready to use.
 
-# Provision a DSE cluster
+# Provision a Cassandra cluster
 
 The previous section created a new resource type in your Kubernetes cluster, the
-`DseDatacenter`. By adding `DseDatacenter` resources to your namespace, you can
-define a cluster topology for the DSE operator to create and monitor. In this
+`CassandraDatacenter`. By adding `CassandraDatacenter` resources to your namespace, you can
+define a cluster topology for the operator to create and monitor. In this
 guide, a three node cluster is provisioned, with one datacenter made up of three
-racks, with a total of one node per rack.
+racks, with one node per rack.
 
 ## Cluster and Datacenter
 
-A DSE logical datacenter is the primary resource managed by the
-dse-k8s-operator. Within a single Kubernetes namespace:
+A logical datacenter is the primary resource managed by the
+cass-operator. Within a single Kubernetes namespace:
 
-- A single `DseDatacenter` resource defines a single-datacenter DSE cluster.
-- Two or more `DseDatacenter` resources with different `dseClusterName`'s define
-  separate and unrelated single-datacenter DSE clusters. Note the operator
+- A single `CassandraDatacenter` resource defines a single-datacenter cluster.
+- Two or more `CassandraDatacenter` resources with different `clusterName`'s define
+  separate and unrelated single-datacenter clusters. Note the operator
   manages both clusters since they reside within the same Kubernetes namespace.
-- Two or more `DseDatacenter` resources that share the same `dseClusterName`
-  define a multi-datacenter DSE cluster. The operator will join the DSE
-  instances in each datacenter into a logical topology that acts as a single DSE
+- Two or more `CassandraDatacenter` resources that have the same `clusterName`
+  define a multi-datacenter cluster. The operator will join the
+  instances in each datacenter into a logical topology that acts as a single
   cluster.
 
 For this guide, we define a single-datacenter cluster. The cluster is named
@@ -125,22 +123,22 @@ For this guide, we define a single-datacenter cluster. The cluster is named
 
 ## Racks
 
-DSE is rack-aware, and the `racks` parameter will configure the DSE operator to
+Cassandra is rack-aware, and the `racks` parameter will configure the operator to
 set up pods in a rack aware way. Note the Kubernetes worker nodes must have
 labels matching `failure-domain.beta.kubernetes.io/zone`. Racks must have
 identifiers. In this guide we will use `r1`, `r2`, and `r3`.
 
-## DSE Node Count
+## Node Count
 
-The `size` parameter is the number of DSE instances to run in the datacenter.
-For optimal performance, it's recommended to run only one DSE instance per
-Kubernetes worker node. The operator will enforce that limit, and DSE
+The `size` parameter is the number of nodes to run in the datacenter.
+For optimal performance, it's recommended to run only one server instance per
+Kubernetes worker node. The operator will enforce that limit, and
 pods may get stuck in the `Pending` status if there are insufficient Kubernetes
 workers available.
 
-We'll assume you have at least three worker nodes available, if you're working
-on a minikube or other setup with a single Kubernetes worker node, you must
-reduce the `size` value accordingly or set the `allowMultipleNodesPerWorker`
+We'll assume you have at least three worker nodes available. If you're working
+locally with minikube or another setup with a single Kubernetes worker node, you must
+reduce the `size` value accordingly, or set the `allowMultipleNodesPerWorker`
 parameter to `true`.
 
 ## Storage
@@ -149,33 +147,34 @@ Define the storage with a combination of the previously provisioned storage
 class and size parameters. These inform the storage provisioner how much room to
 require from the backend.
 
-## Configuration of DSE
+## Configuring the Database
 
-The `config` key in the `DseDatacenter` resource contains the parameters used to
-configure the DSE process running in each pod. In general, it's not necessary to
+The `config` key in the `CassandraDatacenter` resource contains the parameters used to
+configure the server process running in each pod. In general, it's not necessary to
 specify anything here at all. Settings that omitted from the `config` key will
 receive reasonable default values and its quite common to run demo clusters with
-no custom configuration of DSE.
+no custom configuration.
 
-If you're familiar with configuring DSE outside of containers on traditional
+If you're familiar with configuring Apache Cassandra outside of containers on traditional
 operating systems, you may recognize that some familiar configuration parameters
-have been specified elsewhere in the `DseDatacenter` resource, outside of the
+have been specified elsewhere in the `CassandraDatacenter` resource, outside of the
 `config` section. These parameters should not be repeated inside of the config
-section, the operator will populate them from the `DseDatacenter` resource.
+section, the operator will populate them from the `CassandraDatacenter` resource.
 
 For example:
 * `cluster_name`, which is normally specified in `cassandra.yaml`
 * The rack and datacenter properties
 
 Similarly, the operator will automatically populate any values which must
-normally be customized on a per-DSE-instance basis. Do not specify these in the
-`DseDatacenter` resource. For example:
-basis
+normally be customized on a per-instance basis. Do not specify these in the
+`CassandraDatacenter` resource.
+
+For example:
 * `initial_token`
 * `listen_address` and other ip-addresses.
 
 A large number of keys and values can be specified in the `config` section, but
-the details currently not well documented. The `config` key data structure
+the details are currently not well documented. The `config` key data structure
 resembles the API for DataStax OpsCenter Lifecycle Manager (LCM) Configuration
 Profiles. Translating LCM config profile API payloads to this format is
 straightforward. Documentation of this section will be present in future
@@ -183,87 +182,118 @@ releases.
 
 ## Superuser credentials
 
-By default, a publicly known superuser gets created. This leaves a window of
-vulnerability open from the time that the DseDatacenter gets created,
-up until someone updates the credentials. To instead create a superuser
+By default, a cassandra superuser gets created by the operator. A Kubernetes secret
+will be created for it, named `<cluserName>-superuser`. It will contain `username`
+and `password` keys.
+
+```shell
+$ kubectl -n my-db-ns get secret cluster1-superuser
+NAME                       TYPE                                  DATA   AGE
+cluster1-superuser         Opaque                                2      13m
+
+$ kubectl -n my-db-ns get secret cluster1-superuser -o yaml
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: cluster1-superuser
+data:
+  password: d0g0UXRaTTg0VzVXbENCZVo4WmNqRWVFMGx0SXVvWnhMU0k5allsampBYnVLWU9WRTU2NENSWEpwY2twYjArSDlmSnZOcHdrSExZVU8rTk11N1BJRWhhZkpXM1U0WitsdlI1U3owcUhzWmNjRHQ0enhTSFpzeHRNcEFiMzNXVWQ3R25IdUE=
+  username: Y2x1c3RlcjEtc3VwZXJ1c2Vy
+
+$ echo Y2x1c3RlcjEtc3VwZXJ1c2Vy | base64 -D
+cluster1-superuser
+
+$ echo 'd0g0UXRaTTg0VzVXbENCZVo4WmNqRWVFMGx0SXVvWnhMU0k5allsampBYnVLWU9WRTU2NENSWEpwY2twYjArSDlmSnZOcHdrSExZVU8rTk11N1BJRWhhZkpXM1U0WitsdlI1U3owcUhzWmNjRHQ0enhTSFpzeHRNcEFiMzNXVWQ3R25IdUE=' | base64 -D
+wH4QtZM84W5WlCBeZ8ZcjEeE0ltIuoZxLSI9jYljjAbuKYOVE564CRXJpckpb0+H9fJvNpwkHLYUO+NMu7PIEhafJW3U4Z+lvR5Sz0qHsZccDt4zxSHZsxtMpAb33WUd7GnHuA
+```
+
+To instead create a superuser
 with your own credentials, you can create a secret with kubectl.
 
 ### Example superuser secret creation
 
 ```
-kubectl create secret generic dse-superuser-secret \
-    --from-literal=username=someuser \
-    --from-literal=password=somepassword
+kubectl create secret generic superuser-secret -f my-secret.yaml
 ```
 
 To use this new superuser secret, specify the name of the secret from
-within the `DseDatacenter` config yaml that you load into the cluster:
+within the `CassandraDatacenter` config yaml that you load into the cluster:
 
 ```yaml
 apiVersion: datastax.com/v1alpha1
-kind: DseDatacenter
+kind: CassandraDatacenter
 metadata:
   name: dtcntr
 spec:
-  dseSuperuserSecret: dse-superuser-secret
+  superuserSecretName: superuser-secret
 ```
 
-## Specifying DSE version and image
+## Specifying version and image
 
 With the release of the operator v0.4.0 comes a new way to specify
-which version of DSE and image you want to use. From within the config yaml
-for your `DseDatacenter` resource, you can use the `dseVersion` and `dseImage`
+which version of Cassandra or  DSE and image you want to use. From within the config yaml
+for your `CassandraDatacenter` resource, you can use the `serverType`, `imageVersion`, and `serverImage`
 spec properties.
 
-`dseVersion` is required, and currently the only supported value is `6.8.0`.
+`serverType` is required and must be either `dse` or `cassandra`. `imageVersion` is also required,
+and the supported version for DSE is `6.8.0` and for Cassandra it is `3.11.6`. More versions
+will be supported in the future.
 
-If `dseImage` is not specified, a default compatible image for the provided
-`dseVersion` will automatically be used. If you want to use a different image, specify the image in the format `<qualified path>:<tag>`.
+If `serverImage` is not specified, a default image for the provided `serverType` and
+`imageVersion` will automatically be used. If you want to use a different image, specify the image in the format `<qualified path>:<tag>`.
 
 ### Using a default image
 
 ```yaml
 apiVersion: datastax.com/v1alpha1
-kind: DseDatacenter
+kind: CassandraDatacenter
 metadata:
   name: dtcntr
 spec:
-  dseVersion: 6.8.0
+  serverType: dse
+  imageVersion: 6.8.0
+
 ```
 
 ### Using a specific image
 
 ```yaml
 apiVersion: datastax.com/v1alpha1
-kind: DseDatacenter
+kind: CassandraDatacenter
 metadata:
   name: dtcntr
 spec:
-  dseVersion: 6.8.0
-  dseImage: datastaxlabs/dse-k8s-server:6.8.0-20191113
+  serverType: dse
+  imageVersion: 6.8.0
+  dseImage: datastaxlabs/dse-k8s-server:6.8.0-20200316
 ```
 
 ## Example Config
 
-The following example illustrates a `DseDatacenter` resource.
+The following example illustrates a `CassandraDatacenter` resource.
 
 ```yaml
 apiVersion: datastax.com/v1alpha1
-kind: DseDatacenter
+kind: CassandraDatacenter
 metadata:
   name: dc1
 spec:
-  dseClusterName: cluster1
-  dseImage: datastaxlabs/dse-k8s-server:6.8.0-20191113
-  dseVersion: 6.8.0
+  clusterName: cluster1
+  dseImage: datastaxlabs/dse-k8s-server:6.8.0-20200316
+  serverType: dse
+  imageVersion: 6.8.0
   managementApiAuth:
     insecure: {}
   size: 3
-  storageclaim:
-    storageclassname: dse-storage
-    resources:
-      requests:
-        storage: 20Gi
+  storageConfig:
+    cassandraDataVolumeClaimSpec:
+      storageClassName: server-storage
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
   racks:
     - name: r1
       zone: us-central1-a
@@ -287,81 +317,101 @@ spec:
 Consider customizing the example above to suit your requirements, and save it as
 `cluster1-dc1.yaml`. Apply this file via `kubectl` and watch the list of pods as
 the operator deploys them. Completing a deployment may take several minutes per
-DSE instance. When all DSE pods match the `Running` status, the cluster is ready
-to use.
+node. The best way to track the operator's progress is by using
+`kubectl -n my-db-ns describe caasdc dc1` and checking the `status` and events.
 
 ```shell
-$ kubectl -n my-dse-ns apply -f ./cluster1-dc1.yaml
+$ kubectl -n my-db-ns apply -f ./cluster1-dc1.yaml
 
-$ kubectl -n my-dse-ns get pods
+$ kubectl -n my-db-ns get pods
 NAME                            READY   STATUS    RESTARTS   AGE
 dse-operator-f74447c57-kdf2p    1/1     Running   0          13m
 gke-cluster1-dc1-r1-sts-0       1/1     Running   0          5m38s
 gke-cluster1-dc1-r2-sts-0       1/1     Running   0          42s
 gke-cluster1-dc1-r3-sts-0       1/1     Running   0          6m7s
+
+$ kubectl -n my-db-ns describe cassdc dc1
+...
+Status:
+  Cassandra Operator Progress:  Updating
+  Last Server Node Started:     2020-03-10T11:37:28Z
+  Super User Upserted:          2020-03-10T11:38:37Z
+Events:
+  Type     Reason           Age                  From                Message
+  ----     ------           ----                 ----                -------
+  Normal   CreatedResource  9m49s                cassandra-operator  Created service cluster1-dc1-service
+  Normal   CreatedResource  9m49s                cassandra-operator  Created service cluster1-seed-service
+  Normal   CreatedResource  9m49s                cassandra-operator  Created service cluster1-dc1-all-pods-service
+  Normal   CreatedResource  9m49s                cassandra-operator  Created statefulset cluster1-dc1-r1-sts
+  Normal   CreatedResource  9m49s                cassandra-operator  Created statefulset cluster1-dc1-r2-sts
+  Normal   CreatedResource  9m49s                cassandra-operator  Created statefulset cluster1-dc1-r3-sts
 ```
-# Using Your DSE cluster
+
+# Using Your Cluster
 
 ## Connecting from inside the Kubernetes cluster
 
-The DSE operator makes a Kubernetes headless service available at
-`<dseClusterName>-<datacenterName>-service`. Any CQL client inside the
+The operator makes a Kubernetes headless service available at
+`<clusterName>-<datacenterName>-service`. Any CQL client inside the
 Kubernetes cluster should be able to connect to
-`cluster1-dc1-service.my-dse-cluster` and use the nodes in a round-robin fashion
+`cluster1-dc1-service.my-db-ns` and use the nodes in a round-robin fashion
 as contact points.
 
 ## Connecting from outside the Kubernetes cluster
 
-Accessing the DSE instances from CQL clients located outside the Kubernetes
+Accessing the instances from CQL clients located outside the Kubernetes
 cluster is an advanced topic, for which a detailed discussion is outside the
 scope of this document.
 
-Note that exposing DSE on the public internet with authentication disabled or
+Note that exposing Cassandra or DSE on the public internet with authentication disabled or
 with the default username and password in place is extremely dangerous. Its
-strongly recommended to protect your DSE cluster with a network firewall during
+strongly recommended to protect your cluster with a network firewall during
 deployment, and [secure the default superuser
 account](https://docs.datastax.com/en/security/6.7/security/Auth/secCreateRootAccount.html)
 before exposing any ports publicly.
 
 ## Scale up
 
-The `size` parameter on the `DseDatacenter` determines how many DSE instances
-are present in the datacenter. To add more DSE nodes, edit the YAML file from
+The `size` parameter on the `CassandraDatacenter` determines how many server nodes
+are present in the datacenter. To add more nodes, edit the YAML file from
 the `Example Config` section above, and re-apply it precisely as before. The
-operator will add DSE pods to your datacenter, provided there are sufficient
+operator will add pods to your datacenter, provided there are sufficient
 Kubernetes worker nodes available.
 
 For racks to act effectively as a fault-containment zone, each rack in the DSE
 cluster must contain the same number of DSE instances.
 
-## Change DSE configuration
+## Change server configuration
 
-To change the DSE configuration, update the `DseDatacenter` and edit the
+To change the database configuration, update the `CassandraDatacenter` and edit the
 `config` section of the `spec`. The operator will update the config and restart
 one node at a time in a rolling fashion.
 
 ## Multiple Datacenters in one Cluster
 
-To make a multi-datacenter cluster, create two `DseDatacenter` resources and
-give them the same `dseClusterName` in the `spec`.
+To make a multi-datacenter cluster, create two `CassandraDatacenter` resources and
+give them the same `clusterName` in the `spec`.
 
 _Note that multi-region clusters and advanced workloads are not supported, which
-makes many multi-dc use-cases inappropriate for the operator._
+makes many multi-DC use-cases inappropriate for the operator._
 
-# Maintaining Your DSE Cluster
+# Maintaining Your Cluster
 
-## Repair
+## Data Repair
 
 The operator does not automate the process of performing traditional repairs on
-keyspace ranges where the data has become inconsistent due to a DSE instance
+keyspace ranges where the data has become inconsistent due to an instance
 becoming unavailable in the past.
 
-Instead, DSE provides
+DSE provides
 [NodeSync](https://www.datastax.com/2018/04/dse-nodesync-operational-simplicity-at-its-best),
 a continuous background repair service that is declarative and
 self-orchestrating. After creating your cluster, [Enable
 NodeSync](https://docs.datastax.com/en/dse/6.7/dse-admin/datastax_enterprise/tools/dseNodesync/dseNodesyncEnable.html)
 on all new tables.
+
+In the future the operator will support deploying http://cassandra-reaper.io/ for
+Cassandra clusters.
 
 ## Backup
 
@@ -395,6 +445,10 @@ this time.
    for client-to-node and internode encryption.
 
 # Changelog
+
+## v0.9.0
+
+* The operator can work with OSS Apache Cassandra.
 
 ## v0.4.1
 * KO-190 Fix bug introduced in v0.4.0 that prevented scaling up or deleting
