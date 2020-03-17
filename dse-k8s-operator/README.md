@@ -306,7 +306,7 @@ spec:
         - ReadWriteOnce
       resources:
         requests:
-          storage: 20Gi
+          storage: 10Gi
   racks:
     - name: r1
       zone: us-central1-a
