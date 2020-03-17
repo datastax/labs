@@ -311,11 +311,11 @@ spec:
           storage: 10Gi
   racks:
     - name: r1
-      zone: us-central1-a
+      # zone: us-central1-a
     - name: r2
-      zone: us-central1-b
+      # zone: us-central1-b
     - name: r3
-      zone: us-central1-f
+      # zone: us-central1-f
   config:
     dse-yaml:
       authentication_options:
