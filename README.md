@@ -6,23 +6,17 @@ DataStax Labs program.
 
 ## Components
 
-
-### DataStax Early Adopter Release
-
-Refer to the [dse-early-adopter-release](dse-early-adopter-release) directory.
-
-### DataStax Kubernetes Operator
-
-Refer to the [dse-k8s-operator](dse-k8s-operator) directory.
-
 ### DataStax Kafka Connector CDC Source
 
 Refer to the [kafka-connector-cdc](kafka-connector-cdc) directory.
 
-### DataStax Graph Labs
+## Graduated Labs Components
 
-This folder is deprecated as we are folding the graph labs code into the DSE Early Adopter Release directory.
-Refer to the [dsgraph](dsgraph) directory.
+The following labs components have been promoted to GA and are no longer here:
+
+- DataStax Early Adopter Release - [DataStax Enterprise 6.8.0](https://docs.datastax.com/en/landing_page/doc/landing_page/current.html#DataStaxEnterprise)
+- DataStax Graph Labs - [DataStax Enterprise 6.8.0](https://docs.datastax.com/en/landing_page/doc/landing_page/current.html#DataStaxEnterprise)
+- DataStax Kubernetes Operator - [DataStax Kubernetes Operator for Apache Cassandra](https://github.com/datastax/cass-operator)
 
 ## Support
 
