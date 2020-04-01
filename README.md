@@ -7,10 +7,6 @@ DataStax Labs program.
 ## Components
 
 
-### DataStax Kubernetes Operator
-
-Refer to the [dse-k8s-operator](dse-k8s-operator) directory.
-
 ### DataStax Kafka Connector CDC Source
 
 Refer to the [kafka-connector-cdc](kafka-connector-cdc) directory.
