@@ -10,6 +10,11 @@ DataStax Labs program.
 
 Refer to the [kafka-connector-cdc](kafka-connector-cdc) directory.
 
+### DataStax Spring Boot Starter
+*Note: DataStax is now contributing to the Pivotal/VMWare Spring Boot Starter for Cassandra which will replace this when released*
+
+Refer to the [spring-boot-starter](spring-boot-starter) directory
+
 ## Graduated Labs Components
 
 The following labs components have been promoted to GA and are no longer here:
