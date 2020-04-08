@@ -1,0 +1,14 @@
+#
+# The use of the software described here is subject to the DataStax Labs Terms
+# [https://www.datastax.com/terms/datastax-labs-terms]
+#
+
+datastax-java-driver:
+  basic.contact-points:
+    - 127.0.0.1:9042
+  basic.session-keyspace: test
+  basic.load-balancing-policy:
+    local-datacenter: datacenter1
+
+your-setting:
+  a: "value"
